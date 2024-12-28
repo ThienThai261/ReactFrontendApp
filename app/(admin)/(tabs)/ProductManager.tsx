@@ -293,8 +293,34 @@ const ImageUploadModal = ({
     );
 };
 
+function setSelectedProductForDetail(product: Product) {
+    setSelectedProductForDetail(product);
+}
+
+
+function setIsDetailModalVisible(b: boolean) {
+    setIsDetailModalVisible(b);
+}
+
+const handleSetSelectedProductForDetail = (product: Product) => {
+    // Add any additional logic here if needed
+    setSelectedProductForDetail(product);
+};
+
+const handleSetIsDetailModalVisible = (isVisible: boolean) => {
+    // Add any additional logic here if needed
+    setIsDetailModalVisible(isVisible);
+};
+
+const handleProductPress = (product: Product) => {
+    setSelectedProductForDetail(product);
+    setIsDetailModalVisible(true);
+};
+
 // Main Product Manager Component
 const ProductManager: React.FC = () => {
+    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+    const [selectedProductForDetail, setSelectedProductForDetail] = useState<Product | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [searchResult, setSearchResult] = useState<Product | null>(null);
     const [searchId, setSearchId] = useState<string>("");
@@ -472,6 +498,106 @@ const ProductManager: React.FC = () => {
             Alert.alert("Error", `Failed to search for product: ${searchId}`);
         }
     };
+    const ProductDetailModal = ({
+                                    isVisible,
+                                    onClose,
+                                    product
+                                }: {
+        isVisible: boolean;
+        onClose: () => void;
+        product: Product | null;
+    }) => {
+        if (!product) return null;
+
+        return (
+            <Modal
+                visible={isVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={onClose}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={[styles.modalContent, styles.detailModalContent]}>
+                        <ScrollView>
+                            <Text style={styles.modalTitle}>Product Details</Text>
+
+                            {/* Images Gallery */}
+                            <ScrollView
+                                horizontal
+                                style={styles.imageGallery}
+                                showsHorizontalScrollIndicator={false}
+                            >
+                                {product.imageUrls && product.imageUrls.map((imageUrl, index) => (
+                                    <Image
+                                        key={index}
+                                        source={{uri: `${API_BASE_URL}${imageUrl}`}}
+                                        style={styles.galleryImage}
+                                        resizeMode="cover"
+                                    />
+                                ))}
+                            </ScrollView>
+
+                            {/* Product Information */}
+                            <View style={styles.detailsContainer}>
+                                <Text style={styles.productDetailTitle}>{product.name}</Text>
+                                <Text style={styles.productDetailPrice}>Price: ${product.price}</Text>
+
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>ID:</Text>
+                                    <Text style={styles.detailValue}>{product.id}</Text>
+                                </View>
+
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Quantity:</Text>
+                                    <Text style={styles.detailValue}>{product.quantity}</Text>
+                                </View>
+
+                                {product.material && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>Material:</Text>
+                                        <Text style={styles.detailValue}>{product.material}</Text>
+                                    </View>
+                                )}
+
+                                {product.size && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>Size:</Text>
+                                        <Text style={styles.detailValue}>{product.size}</Text>
+                                    </View>
+                                )}
+
+                                {product.gender && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={styles.detailLabel}>Gender:</Text>
+                                        <Text style={styles.detailValue}>{product.gender}</Text>
+                                    </View>
+                                )}
+
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Status:</Text>
+                                    <Text style={styles.detailValue}>
+                                        {product.status === 1 ? 'Active' : 'Inactive'}
+                                    </Text>
+                                </View>
+
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Category ID:</Text>
+                                    <Text style={styles.detailValue}>{product.id_category}</Text>
+                                </View>
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={onClose}
+                        >
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        );
+    };
 
     useEffect(() => {
         fetchProducts();
@@ -516,6 +642,7 @@ const ProductManager: React.FC = () => {
                 data={products}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({item}) => (
+
                     <View style={styles.card}>
                         {item.thumbnailUrl && (
                             <Image
@@ -530,6 +657,11 @@ const ProductManager: React.FC = () => {
                             <Text>Quantity: {item.quantity}</Text>
                             <Text>Category: {item.id_category}</Text>
                         </View>
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={() => handleProductPress(item)}
+                        >
+                        </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.updateButton}
                             onPress={() => handleUpdatePress(item)}
@@ -564,6 +696,11 @@ const ProductManager: React.FC = () => {
                 initialData={selectedProduct}
                 isLoading={isSubmitting}
             />
+            <ProductDetailModal
+                isVisible={isDetailModalVisible}
+                onClose={() => setIsDetailModalVisible(false)}
+                product={selectedProductForDetail}
+            />
         </View>
     );
 };
@@ -584,15 +721,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 16,
     },
-    input: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 4,
-        padding: 8,
-        marginBottom: 8,
-        marginRight: 8,
-    },
+
     card: {
         flexDirection: "row",
         padding: 16,
@@ -648,23 +777,35 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: 20,
     },
     modalContent: {
         backgroundColor: '#fff',
         padding: 20,
         borderRadius: 8,
-        width: '80%',
-        maxHeight: '80%',
+        width: '95%', // Increased from 80%
+        maxHeight: '90%', // Increased from 80%
+        alignSelf: 'center',
     },
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 16,
     },
+    input: {
+        width: '100%',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 4,
+        padding: 12, // Increased padding
+        marginBottom: 16, // Increased margin
+        fontSize: 16, // Added font size
+    },
     modalButtons: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 16,
+        justifyContent: 'space-around', // Changed from space-between
+        marginTop: 24,
+        paddingHorizontal: 10,
     },
     updateButton: {
         padding: 8,
@@ -724,8 +865,62 @@ const styles = StyleSheet.create({
     thumbnailButtonText: {
         color: '#333',
     }, thumbnailButtonTextSelected: {},
-
+    detailModalContent: {
+        width: '90%',
+        maxHeight: '80%',
+    },
+    imageGallery: {
+        height: 200,
+        marginBottom: 20,
+    },
+    galleryImage: {
+        width: 200,
+        height: 200,
+        marginRight: 10,
+        borderRadius: 8,
+    },
+    detailsContainer: {
+        padding: 15,
+    },
+    productDetailTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    productDetailPrice: {
+        fontSize: 20,
+        color: '#007AFF',
+        marginBottom: 20,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    detailLabel: {
+        flex: 1,
+        fontWeight: '500',
+        color: '#666',
+    },
+    detailValue: {
+        flex: 2,
+        color: '#333',
+    },
+    closeButton: {
+        marginTop: 20,
+        padding: 15,
+        backgroundColor: '#007AFF',
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '500',
+    },
 
 });
+
 
 export default ProductManager;

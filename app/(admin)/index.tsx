@@ -1,16 +1,16 @@
-import {Text, View, StyleSheet} from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
 import React from "react";
-import {Link, router} from "expo-router";
-import ButtonNew from "@/components/ui/ButtonNew";
+import {router} from "expo-router";
 import HamburgerButton from "@/components/ui/HamburgerButton";
 
-export default function Index() {
-
+export default function AdminDashboard() {
     const handleMenuPress = () => {
-
-        router.push("//(tabs)ProductManager");
+        router.push("//(admin)/(tabs)/products");
     };
 
+    const handleLoginPress = () => {
+        router.push("./(auth)/"); // Correctly routes to the index within the (auth) group
+    };
     return (
         <View style={styles.container}>
             <View style={styles.linkContainer}>
@@ -20,11 +20,16 @@ export default function Index() {
                 <Text style={styles.welcomeMessage}>
                     Welcome to the Admin Panel
                 </Text>
+                <TouchableOpacity
+                    style={styles.loginButton}
+                    onPress={handleLoginPress}
+                >
+                    <Text style={styles.loginButtonText}>Go to Login</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
 }
-
 
 const styles = StyleSheet.create({
     welcomeMessage: {
@@ -32,7 +37,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 20,
         color: "#333",
-
     },
     container: {
         flex: 1,
@@ -41,7 +45,7 @@ const styles = StyleSheet.create({
     },
     header: {
         position: 'absolute',
-        top: 40, // Adjust this value based on your needs
+        top: 40,
         left: 20,
         zIndex: 1,
     },
@@ -49,9 +53,15 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 10,
     },
-    link: {
-        color: "blue",
+    loginButton: {
+        backgroundColor: '#4CAF50',
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 10,
+    },
+    loginButtonText: {
+        color: 'white',
         fontSize: 16,
-        marginVertical: 8,
+        fontWeight: 'bold',
     },
 });
