@@ -293,29 +293,9 @@ const ImageUploadModal = ({
     );
 };
 
-function setSelectedProductForDetail(product: Product) {
-    setSelectedProductForDetail(product);
-}
 
 
-function setIsDetailModalVisible(b: boolean) {
-    setIsDetailModalVisible(b);
-}
 
-const handleSetSelectedProductForDetail = (product: Product) => {
-    // Add any additional logic here if needed
-    setSelectedProductForDetail(product);
-};
-
-const handleSetIsDetailModalVisible = (isVisible: boolean) => {
-    // Add any additional logic here if needed
-    setIsDetailModalVisible(isVisible);
-};
-
-const handleProductPress = (product: Product) => {
-    setSelectedProductForDetail(product);
-    setIsDetailModalVisible(true);
-};
 
 // Main Product Manager Component
 const ProductManager: React.FC = () => {
@@ -498,106 +478,7 @@ const ProductManager: React.FC = () => {
             Alert.alert("Error", `Failed to search for product: ${searchId}`);
         }
     };
-    const ProductDetailModal = ({
-                                    isVisible,
-                                    onClose,
-                                    product
-                                }: {
-        isVisible: boolean;
-        onClose: () => void;
-        product: Product | null;
-    }) => {
-        if (!product) return null;
 
-        return (
-            <Modal
-                visible={isVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={onClose}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={[styles.modalContent, styles.detailModalContent]}>
-                        <ScrollView>
-                            <Text style={styles.modalTitle}>Product Details</Text>
-
-                            {/* Images Gallery */}
-                            <ScrollView
-                                horizontal
-                                style={styles.imageGallery}
-                                showsHorizontalScrollIndicator={false}
-                            >
-                                {product.imageUrls && product.imageUrls.map((imageUrl, index) => (
-                                    <Image
-                                        key={index}
-                                        source={{uri: `${API_BASE_URL}${imageUrl}`}}
-                                        style={styles.galleryImage}
-                                        resizeMode="cover"
-                                    />
-                                ))}
-                            </ScrollView>
-
-                            {/* Product Information */}
-                            <View style={styles.detailsContainer}>
-                                <Text style={styles.productDetailTitle}>{product.name}</Text>
-                                <Text style={styles.productDetailPrice}>Price: ${product.price}</Text>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>ID:</Text>
-                                    <Text style={styles.detailValue}>{product.id}</Text>
-                                </View>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Quantity:</Text>
-                                    <Text style={styles.detailValue}>{product.quantity}</Text>
-                                </View>
-
-                                {product.material && (
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>Material:</Text>
-                                        <Text style={styles.detailValue}>{product.material}</Text>
-                                    </View>
-                                )}
-
-                                {product.size && (
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>Size:</Text>
-                                        <Text style={styles.detailValue}>{product.size}</Text>
-                                    </View>
-                                )}
-
-                                {product.gender && (
-                                    <View style={styles.detailRow}>
-                                        <Text style={styles.detailLabel}>Gender:</Text>
-                                        <Text style={styles.detailValue}>{product.gender}</Text>
-                                    </View>
-                                )}
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Status:</Text>
-                                    <Text style={styles.detailValue}>
-                                        {product.status === 1 ? 'Active' : 'Inactive'}
-                                    </Text>
-                                </View>
-
-                                <View style={styles.detailRow}>
-                                    <Text style={styles.detailLabel}>Category ID:</Text>
-                                    <Text style={styles.detailValue}>{product.id_category}</Text>
-                                </View>
-                            </View>
-                        </ScrollView>
-
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={onClose}
-                        >
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-        );
-    };
 
     useEffect(() => {
         fetchProducts();
@@ -637,41 +518,6 @@ const ProductManager: React.FC = () => {
                     </View>
                 </View>
             )}
-
-            <FlatList
-                data={products}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({item}) => (
-
-                    <View style={styles.card}>
-                        {item.thumbnailUrl && (
-                            <Image
-                                source={{uri: `${API_BASE_URL}${item.thumbnailUrl}`}}
-                                style={styles.productImage}
-                                resizeMode="cover"
-                            />
-                        )}
-                        <View style={styles.productInfo}>
-                            <Text style={styles.name}>{item.name}</Text>
-                            <Text>Price: ${item.price}</Text>
-                            <Text>Quantity: {item.quantity}</Text>
-                            <Text>Category: {item.id_category}</Text>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.card}
-                            onPress={() => handleProductPress(item)}
-                        >
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.updateButton}
-                            onPress={() => handleUpdatePress(item)}
-                        >
-                            <Text style={styles.updateButtonText}>✎</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
-
             <TouchableOpacity
                 style={styles.floatingButton}
                 onPress={() => setIsAddModalVisible(true)}
@@ -701,9 +547,153 @@ const ProductManager: React.FC = () => {
                 onClose={() => setIsDetailModalVisible(false)}
                 product={selectedProductForDetail}
             />
+            <FlatList
+                data={products}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({item}) => (
+                    <TouchableOpacity
+                        style={styles.card}
+                        onPress={() => {
+                            setSelectedProductForDetail(item);
+                            setIsDetailModalVisible(true);
+                        }}
+                    >
+                        {item.thumbnailUrl && (
+                            <Image
+                                source={{uri: `${API_BASE_URL}${item.thumbnailUrl}`}}
+                                style={styles.productImage}
+                                resizeMode="cover"
+                            />
+                        )}
+                        <View style={styles.productInfo}>
+                            <Text style={styles.name}>{item.name}</Text>
+                            <Text>Price: ${item.price}</Text>
+                            <Text>Quantity: {item.quantity}</Text>
+                            <Text>Category: {item.id_category}</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.updateButton}
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                handleUpdatePress(item);
+                            }}
+                        >
+                            <Text style={styles.updateButtonText}>✎</Text>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                )}
+            />
+
         </View>
     );
 };
+const ProductDetailModal = ({
+                                isVisible,
+                                onClose,
+                                product
+                            }: {
+    isVisible: boolean;
+    onClose: () => void;
+    product: Product | null;
+}) => {
+    if (!product) return null;
+
+    return (
+        <Modal
+            visible={isVisible}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={onClose}
+        >
+            <View style={styles.modalContainer}>
+                <View style={[styles.modalContent, styles.detailModalContent]}>
+                    <ScrollView>
+                        <Text style={styles.modalTitle}>Product Details</Text>
+
+                        {/* Product Images Gallery */}
+                        <ScrollView
+                            horizontal
+                            style={styles.imageGallery}
+                            showsHorizontalScrollIndicator={false}
+                        >
+                            {product.imageUrls ? (
+                                product.imageUrls.map((imageUrl, index) => (
+                                    <Image
+                                        key={index}
+                                        source={{uri: `${API_BASE_URL}${imageUrl}`}}
+                                        style={styles.galleryImage}
+                                        resizeMode="cover"
+                                    />
+                                ))
+                            ) : (
+                                <View style={[styles.galleryImage, styles.placeholderImage]}>
+                                    <ImageIcon size={40} color="#999"/>
+                                </View>
+                            )}
+                        </ScrollView>
+
+                        {/* Product Information */}
+                        <View style={styles.detailsContainer}>
+                            <Text style={styles.productDetailTitle}>{product.name}</Text>
+                            <Text style={styles.productDetailPrice}>${product.price}</Text>
+
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>ID:</Text>
+                                <Text style={styles.detailValue}>{product.id}</Text>
+                            </View>
+
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Quantity:</Text>
+                                <Text style={styles.detailValue}>{product.quantity}</Text>
+                            </View>
+
+                            {product.material && (
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Material:</Text>
+                                    <Text style={styles.detailValue}>{product.material}</Text>
+                                </View>
+                            )}
+
+                            {product.size && (
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Size:</Text>
+                                    <Text style={styles.detailValue}>{product.size}</Text>
+                                </View>
+                            )}
+
+                            {product.gender && (
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Gender:</Text>
+                                    <Text style={styles.detailValue}>{product.gender}</Text>
+                                </View>
+                            )}
+
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Status:</Text>
+                                <Text style={styles.detailValue}>
+                                    {product.status === 1 ? 'Active' : 'Inactive'}
+                                </Text>
+                            </View>
+
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Category:</Text>
+                                <Text style={styles.detailValue}>{product.id_category}</Text>
+                            </View>
+                        </View>
+                    </ScrollView>
+
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={onClose}
+                    >
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
+};
+
 
 const styles = StyleSheet.create({
     container: {

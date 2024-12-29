@@ -2,6 +2,9 @@ import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
 import React from "react";
 import {router} from "expo-router";
 import HamburgerButton from "@/components/ui/HamburgerButton";
+import {push} from "expo-router/build/global-state/routing";
+
+
 
 export default function AdminDashboard() {
     const handleMenuPress = () => {
@@ -11,6 +14,12 @@ export default function AdminDashboard() {
     const handleLoginPress = () => {
         router.push("./(auth)/"); // Correctly routes to the index within the (auth) group
     };
+    const handledetailPress = () => {
+        router.push("./products/detail")
+    }
+    const handleCartPress = () => {
+        router.push("./(cart)/CartScreen")
+    }
     return (
         <View style={styles.container}>
             <View style={styles.linkContainer}>
@@ -25,6 +34,18 @@ export default function AdminDashboard() {
                     onPress={handleLoginPress}
                 >
                     <Text style={styles.loginButtonText}>Go to Login</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.loginButton}
+                    onPress={handledetailPress}
+                >
+                    <Text style={styles.loginButtonText}>Go to detail</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.loginButton}
+                    onPress={handleCartPress}
+                >
+                    <Text style={styles.loginButtonText}>Go to cart</Text>
                 </TouchableOpacity>
             </View>
         </View>
