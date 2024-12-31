@@ -354,8 +354,8 @@ const ProductManager: React.FC = () => {
             setProducts(transformedProducts);
             setError(null);
         } catch (err: any) {
-            console.error('Error fetching products:', err);
-            setError('Failed to fetch products');
+            console.error('Error fetching (products):', err);
+            setError('Failed to fetch (products)');
         } finally {
             setLoading(false);
         }

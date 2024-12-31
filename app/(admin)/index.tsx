@@ -6,13 +6,15 @@ import {push} from "expo-router/build/global-state/routing";
 
 
 
-export default function AdminDashboard() {
-    const handleMenuPress = () => {
-        router.push("//(admin)/(tabs)/products");
-    };
 
+export default function AdminDashboard() {
+
+
+    const handleUserPress = () => {
+        router.push("./(user)/"); // Correctly routes to the index within the (auth) group
+    };
     const handleLoginPress = () => {
-        router.push("./(auth)/"); // Correctly routes to the index within the (auth) group
+        router.push("./(LoginAndRegister)/Login"); // Correctly routes to the index within the (auth) group
     };
     const handledetailPress = () => {
         router.push("./products/detail")
@@ -23,12 +25,16 @@ export default function AdminDashboard() {
     return (
         <View style={styles.container}>
             <View style={styles.linkContainer}>
-                <View style={styles.header}>
-                    <HamburgerButton onPress={handleMenuPress} color="#000"/>
-                </View>
+
                 <Text style={styles.welcomeMessage}>
                     Welcome to the Admin Panel
                 </Text>
+                <TouchableOpacity
+                    style={styles.loginButton}
+                    onPress={handleUserPress}
+                >
+                    <Text style={styles.loginButtonText}>Go to user</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.loginButton}
                     onPress={handleLoginPress}
