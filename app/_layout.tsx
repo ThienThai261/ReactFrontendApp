@@ -1,39 +1,37 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import {Drawer} from 'expo-router/drawer';
+import React from 'react';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+export default function AdminLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+      <Drawer screenOptions={{headerShown: true}}>
+        <Drawer.Screen
+            name="index"
+            options={{
+              drawerLabel: 'Dashboard',
+              title: 'Admin Dashboard ',
+            }}
+        />
+        <Drawer.Screen
+            name="(tabs)/ProductManager"
+            options={{
+              drawerLabel: 'Products',
+              title: 'Product Manager',
+            }}
+        />
+        <Drawer.Screen
+            name="(tabs)/UserTable"
+            options={{
+              drawerLabel: 'Users',
+              title: 'User Table',
+            }}
+        />
+        <Drawer.Screen
+            name="(tabs)/OrderManager"
+            options={{
+              drawerLabel: 'Orders',
+              title: 'Order Manager',
+            }}
+        />
+      </Drawer>
   );
 }
