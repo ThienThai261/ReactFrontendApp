@@ -1,14 +1,14 @@
-// OrderHistory.tsx (trong thư mục auth/tabs)
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     FlatList,
     StyleSheet,
-    TouchableOpacity,
     ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ReturnButton from "@/components/ui/ReturnButton";
 
 interface Order {
     id: string;
@@ -47,10 +47,28 @@ const OrderHistory = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('http://192.168.0.107:9093/order/all');
-            setOrders(response.data);
+            const token = await AsyncStorage.getItem('userDetails');
+            if (!token) {
+                throw new Error('User is not logged in');
+            }
+
+            // Assuming the token contains the account ID or use the token to fetch it
+            const userDetails = JSON.parse(token);
+            const accountId = userDetails.id;
+
+            const response = await axios.get(`http://192.168.0.107:9093/order/account/${accountId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status === 200) {
+                setOrders(response.data);
+            } else {
+                setError('Failed to fetch orders. Please try again later.');
+            }
         } catch (err: any) {
-            setError(err.message);
+            setError(err.message || 'An unexpected error occurred.');
         } finally {
             setLoading(false);
         }
@@ -62,39 +80,53 @@ const OrderHistory = () => {
     };
 
     const calculateTotal = (details: OrderDetail[]) => {
-        return details.reduce((sum, detail) => sum + (detail.price * detail.quantity), 0);
+        return details.reduce((sum, detail) => sum + detail.price * detail.quantity, 0);
     };
 
-    if (loading) return <ActivityIndicator size="large" color="#0000ff"/>;
+    if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
+
     if (error) return <Text style={styles.errorText}>Error: {error}</Text>;
+
+    if (orders.length === 0) {
+        return <Text style={styles.noOrdersText}>You have no past orders.</Text>;
+    }
 
     return (
         <View style={styles.container}>
+            <ReturnButton></ReturnButton>
             <Text style={styles.title}>Purchase History</Text>
             <FlatList
                 data={orders}
                 keyExtractor={(item) => item.id}
-                renderItem={({item: order}) => (
+                renderItem={({ item: order }) => (
                     <View style={styles.orderCard}>
                         <View style={styles.orderHeader}>
                             <Text style={styles.orderId}>Order #{order.id}</Text>
-                            <Text style={[
-                                styles.statusBadge,
-                                {backgroundColor: order.status === 4 ? '#4CAF50' : '#FFA726'}
-                            ]}>
+                            <Text
+                                style={[
+                                    styles.statusBadge,
+                                    {
+                                        backgroundColor:
+                                            order.status === 4 ? '#4CAF50' : '#FFA726',
+                                    },
+                                ]}
+                            >
                                 {statusMap[order.status]}
                             </Text>
                         </View>
                         <Text>Purchase Date: {formatDate(order.dateBuy)}</Text>
                         <Text>Delivery Date: {formatDate(order.dateArrival)}</Text>
                         <Text>Total Items: {order.orderDetails.length}</Text>
-                        <Text style={styles.totalPrice}>Total: ${calculateTotal(order.orderDetails)}</Text>
+                        <Text style={styles.totalPrice}>
+                            Total: ${calculateTotal(order.orderDetails).toFixed(2)}
+                        </Text>
                     </View>
                 )}
             />
         </View>
     );
 };
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -109,6 +141,11 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 16,
         color: 'red',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    noOrdersText: {
+        fontSize: 18,
         textAlign: 'center',
         marginTop: 20,
     },
@@ -140,17 +177,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 8,
     },
-    productCard: {
-        backgroundColor: 'white',
-        padding: 16,
-        borderRadius: 8,
-        marginBottom: 12,
-        elevation: 2,
-    },
-    productName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
 });
+
 export default OrderHistory;
