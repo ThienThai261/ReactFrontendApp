@@ -56,7 +56,7 @@ const CheckoutScreen = ({navigation}: { navigation: any }) => {
 
             <TouchableOpacity
                 style={styles.checkoutButton}
-                onPress={() => navigation.navigate('CartScreen')} // Change to your cart screen name
+                onPress={() => navigation.navigate('Index')} // Change to your cart screen name
             >
                 <Text style={styles.checkoutButtonText}>Continue to Payment</Text>
             </TouchableOpacity>

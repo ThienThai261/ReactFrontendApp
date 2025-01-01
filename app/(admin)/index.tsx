@@ -1,10 +1,6 @@
 import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
 import React from "react";
 import {router} from "expo-router";
-import HamburgerButton from "@/components/ui/HamburgerButton";
-import {push} from "expo-router/build/global-state/routing";
-
-
 
 
 export default function AdminDashboard() {

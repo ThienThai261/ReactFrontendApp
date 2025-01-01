@@ -1,70 +1,80 @@
-import React, {useState} from 'react';
 import {View, Text, ScrollView, StyleSheet, TextInput, Modal, TouchableOpacity} from 'react-native';
+import React, {useState} from 'react';
 import {MaterialIcons, FontAwesome} from '@expo/vector-icons';
-import {useRouter} from 'expo-router';
-
-
+import {router} from 'expo-router';
 import HamburgerButton from "@/components/ui/HamburgerButton";
-import 'react-native-gesture-handler';
 
-import {HelloWave} from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import {ThemedText} from '@/components/ThemedText';
-import {ThemedView} from '@/components/ThemedView';
+export default function UserDashboard() {
+    const [isModalVisible, setModalVisible] = useState(false);
 
-export default function HomeScreen() {
-    const router = useRouter();
+    const handleOrderHistoryPress = () => {
+        router.push('./(user)/(tabs)/OrderHistory');
+    };
+
+    const handlePurchasedProductsPress = () => {
+        router.push('./(user)/(tabs)/PurchasedProducts');
+    };
+    const handleAdminPress = () => {
+        router.push('./(admin)/');
+    };
+
+    const handleLogoutPress = () => {
+        // Add logout logic here
+    };
+
+    const handleChangePasswordPress = () => {
+        setModalVisible(true);
+    };
+
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <HamburgerButton color="#000"/>
-            </View>
-            {/* User Info Section */}
             <View style={styles.userInfo}>
+
                 <FontAwesome name="user-circle" size={60} color="#4caf50"/>
                 <View style={{marginLeft: 10, flex: 1}}>
                     <Text style={styles.username}>Thai Quoc</Text>
                     <Text style={styles.infoText}>Phone: 0123456789</Text>
                     <Text style={styles.infoText}>Email: godslayder2612003@gmail.com</Text>
                 </View>
-
+                <TouchableOpacity onPress={handleChangePasswordPress}>
+                    <Text style={styles.changePasswordLink}>Change Password</Text>
+                </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.buttonContainer}>
-                {/* Order History Button */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => router.push('./(auth)/(tabs)/OrderHistory')}
+                    onPress={handleOrderHistoryPress}
                 >
                     <MaterialIcons name="receipt" size={20} color="#fff"/>
                     <Text style={styles.buttonText}>Order History</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => router.push('./(admin)/')}
-                >
-                    <MaterialIcons name="receipt" size={20} color="#fff"/>
-                    <Text style={styles.buttonText}>Admin</Text>
-                </TouchableOpacity>
 
-                {/* Purchased Products Button */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => router.push('./(auth)/(tabs)/PurchasedProducts')}
+                    onPress={handlePurchasedProductsPress}
                 >
                     <MaterialIcons name="visibility" size={20} color="#fff"/>
                     <Text style={styles.buttonText}>Purchased Products</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleAdminPress}
+                >
+                    <MaterialIcons name="visibility" size={20} color="#fff"/>
+                    <Text style={styles.buttonText}>Admin</Text>
+                </TouchableOpacity>
 
-                {/* Logout Button */}
-                <TouchableOpacity style={[styles.button, styles.logoutButton]}>
+                <TouchableOpacity
+                    style={[styles.button, styles.logoutButton]}
+                    onPress={handleLogoutPress}
+                >
                     <MaterialIcons name="logout" size={20} color="#fff"/>
                     <Text style={styles.buttonText}>Logout</Text>
                 </TouchableOpacity>
             </ScrollView>
 
-            {/* Change Password Modal */}
-
+            {/* Modal remains the same */}
         </View>
     );
 }

@@ -9,7 +9,7 @@ import {
     FlatList,
 } from 'react-native';
 
-const CartScreen = () => {
+const Index = () => {
     const [cartItems, setCartItems] = useState([
         {
             id: '1',
@@ -213,4 +213,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default CartScreen;
+export default Index;

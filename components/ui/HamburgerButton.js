@@ -1,48 +1,18 @@
-
-// components/ui/HamburgerButton.js
 import React from 'react';
-import {TouchableOpacity, View, StyleSheet} from 'react-native';
-import {useNavigation, DrawerActions} from '@react-navigation/native';
+import {TouchableOpacity} from 'react-native';
+import {MaterialIcons} from '@expo/vector-icons';
+import {useNavigation} from '@react-navigation/native';
 
-const HamburgerButton = ({color = '#000'}) => {
+export default function HamburgerButton() {
     const navigation = useNavigation();
 
-    const handlePress = () => {
-        try {
-            // Use toggleDrawer method
-            if (navigation.toggleDrawer) {
-                console.log('navigation:', navigation);
-                navigation.toggleDrawer();
-            } else {
-                console.log('fall:', navigation);
-                // Fallback to dispatch method
-                navigation.dispatch(DrawerActions.toggleDrawer());
-            }
-        } catch (error) {
-            console.warn('Navigation action failed:', error);
-        }
+    const toggleDrawer = () => {
+        navigation.dispatch(DrawerActions.toggleDrawer());
     };
 
     return (
-        <TouchableOpacity onPress={handlePress} style={styles.button}>
-            <View style={[styles.bar, {backgroundColor: color}]}/>
-            <View style={[styles.bar, {backgroundColor: color}]}/>
-            <View style={[styles.bar, {backgroundColor: color}]}/>
+        <TouchableOpacity onPress={toggleDrawer}>
+            <MaterialIcons name="menu" size={24} color="#4caf50"/>
         </TouchableOpacity>
     );
-};
-
-const styles = StyleSheet.create({
-    button: {
-        padding: 10,
-        justifyContent: 'space-between',
-        height: 24,
-    },
-    bar: {
-        width: 24,
-        height: 2,
-        borderRadius: 1,
-    },
-});
-
-export default HamburgerButton;
+}

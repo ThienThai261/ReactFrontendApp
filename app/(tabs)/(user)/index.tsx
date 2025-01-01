@@ -8,11 +8,11 @@ export default function UserDashboard() {
     const [isModalVisible, setModalVisible] = useState(false);
 
     const handleOrderHistoryPress = () => {
-        router.push('/(user)/(tabs)/OrderHistory');
+        router.push('./(user)/(tabs)/OrderHistory');
     };
 
     const handlePurchasedProductsPress = () => {
-        router.push('/(user)/(tabs)/PurchasedProducts');
+        router.push('./(user)/(tabs)/PurchasedProducts');
     };
 
     const handleLogoutPress = () => {
@@ -26,10 +26,8 @@ export default function UserDashboard() {
     return (
         <View style={styles.container}>
             <View style={styles.userInfo}>
-                <View style={styles.header}>
-                    <HamburgerButton></HamburgerButton>
-                </View>
-                <FontAwesome name="user-circle" size={60} color="#4caf50"/>
+
+            <FontAwesome name="user-circle" size={60} color="#4caf50"/>
                 <View style={{marginLeft: 10, flex: 1}}>
                     <Text style={styles.username}>Thai Quoc</Text>
                     <Text style={styles.infoText}>Phone: 0123456789</Text>
