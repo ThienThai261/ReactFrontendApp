@@ -1,7 +1,7 @@
 // App.tsx
 import React from 'react';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-import {NavigationContainer} from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer } from '@react-navigation/native';
 import ProductManager from './(tabs)/ProductManager';
 import UserTable from './(tabs)/UserTable';
 import HamburgerButton from '@/components/ui/HamburgerButton';
@@ -12,7 +12,7 @@ export default function App() {
     return (
         <NavigationContainer>
             <Drawer.Navigator
-                screenOptions={({navigation}) => ({
+                screenOptions={({ navigation }) => ({
                     headerLeft: () => (
                         <HamburgerButton
                             onPress={() => navigation.openDrawer()}

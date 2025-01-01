@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import {Drawer} from 'expo-router/drawer';
+import { Drawer } from 'expo-router/drawer';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -9,6 +9,10 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import UserTable from "@/app/(tabs)/UserTable";
+
+// import { createStackNavigator } from '@react-navigation/stack';
+// import index from './index'
+// import detail from '../screen/detail'
 
 
 // export default function TabLayout() {
@@ -82,6 +86,18 @@ import UserTable from "@/app/(tabs)/UserTable";
 //   );
 //
 // }
+
+// const Stack = createStackNavigator()
+
+// const MyHome = () => {
+//     return (
+//         <Stack.Navigator>
+//             <Stack.Screen name="Home" component={index} />
+//             <Stack.Screen name="Detail" component={detail} />
+//         </Stack.Navigator>
+//     )
+// }
+
 export default function Layout() {
     return (
         <Drawer>

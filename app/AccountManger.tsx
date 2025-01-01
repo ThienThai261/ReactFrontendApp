@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface Account {
     id: number;
@@ -10,8 +10,8 @@ interface Account {
 const AccountManager = () => {
     // State to hold the list of accounts
     const [accounts, setAccounts] = useState<Account[]>([
-        {id: 1, username: 'john_doe', email: 'john@example.com'},
-        {id: 2, username: 'jane_smith', email: 'jane@example.com'},
+        { id: 1, username: 'john_doe', email: 'john@example.com' },
+        { id: 2, username: 'jane_smith', email: 'jane@example.com' },
     ]);
 
     // States for adding a new account
@@ -55,13 +55,13 @@ const AccountManager = () => {
                 value={newEmail}
                 onChangeText={setNewEmail}
             />
-            <Button title="Add Account" onPress={addAccount}/>
+            <Button title="Add Account" onPress={addAccount} />
 
             {/* List of accounts */}
             <FlatList
                 data={accounts}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({item}) => (
+                renderItem={({ item }) => (
                     <View style={styles.accountContainer}>
                         <Text style={styles.accountText}>{item.username} ({item.email})</Text>
                         <TouchableOpacity onPress={() => deleteAccount(item.id)} style={styles.deleteButton}>
