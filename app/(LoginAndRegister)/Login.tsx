@@ -8,6 +8,7 @@ import {
     Image,
     Alert,
 } from "react-native";
+import {router} from "expo-router";
 import {LinearGradient} from "expo-linear-gradient";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
@@ -33,47 +34,49 @@ export default function LoginAndRegister({navigation}) {
 
             console.log("Server response:", response.data);
 
-            const result = response.data;
+            if (response.data.success) {
+                // Store user details in AsyncStorage
+                const userDetails = {
+                    isLoggedIn: true,
+                    username: response.data.username,
+                    email: response.data.email,
+                    fullname: response.data.fullname,
+                    phone: response.data.phone,
+                    id: response.data.id
+                };
 
-            if (result === "Login successful.") {
-                // Store session data
-                await AsyncStorage.setItem("isLoggedIn", "true");
-                await AsyncStorage.setItem("username", username);
+                await AsyncStorage.setItem("userDetails", JSON.stringify(userDetails));
 
-                // Alert on success
                 Alert.alert("Login Success", "Welcome!");
-
-                // Clear any existing errors
                 setError("");
-
-                // Navigate to the dashboard or home
-                navigation.navigate("./(admin)/");
+                router.push("../(tabs)/(user)/userDetail");
             } else {
-                setError(result);
-                Alert.alert("Login Failed", result);
+                setError(response.data.message || "Login failed");
+                Alert.alert("Login Failed", response.data.message);
             }
         } catch (err) {
             console.error("Error details:", err);
-
-            if (axios.isAxiosError(err)) {
-                if (err.response) {
-                    const message = err.response.data.message || "Server returned an error.";
-                    setError(message);
-                    Alert.alert("Error", message);
-                } else if (err.request) {
-                    setError("No response from server. Check your connection.");
-                    Alert.alert("Network Error", "No response from server. Check your connection.");
-                } else {
-                    setError("Request failed. Please try again.");
-                    Alert.alert("Request Error", "Request failed. Please try again.");
-                }
-            } else {
-                setError("An unexpected error occurred.");
-                Alert.alert("Error", "An unexpected error occurred.");
-            }
+            handleLoginError(err);
         }
     };
-
+    const handleLoginError = (err) => {
+        if (axios.isAxiosError(err)) {
+            if (err.response) {
+                const message = err.response.data.message || "Server returned an error.";
+                setError(message);
+                Alert.alert("Error", message);
+            } else if (err.request) {
+                setError("No response from server. Check your connection.");
+                Alert.alert("Network Error", "No response from server. Check your connection.");
+            } else {
+                setError("Request failed. Please try again.");
+                Alert.alert("Request Error", "Request failed. Please try again.");
+            }
+        } else {
+            setError("An unexpected error occurred.");
+            Alert.alert("Error", "An unexpected error occurred.");
+        }
+    };
 
     return (
         <View style={styles.container}>

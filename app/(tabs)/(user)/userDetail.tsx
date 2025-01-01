@@ -1,37 +1,89 @@
 import {View, Text, ScrollView, StyleSheet, TextInput, Modal, TouchableOpacity} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {MaterialIcons, FontAwesome} from '@expo/vector-icons';
 import {router} from 'expo-router';
 import HamburgerButton from "@/components/ui/HamburgerButton";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+interface UserDetails {
+    username: string;
+    email: string;
+    fullname: string;
+    numberphone: string;
+    id: number;
+}
 export default function UserDashboard() {
     const [isModalVisible, setModalVisible] = useState(false);
+    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+        loadUserDetails();
+    }, []);
+    const saveToken = async (token) => {
+        try {
+            await AsyncStorage.setItem('userToken', token);
+        } catch (error) {
+            console.error('Error saving token:', error);
+        }
+    };
 
-    const handleOrderHistoryPress = () => {
-        router.push('./(user)/(tabs)/OrderHistory');
+    const loadUserDetails = async () => {
+        try {
+            setIsLoading(true);
+            const userDetailsString = await AsyncStorage.getItem("userDetails");
+            if (userDetailsString) {
+                const details = JSON.parse(userDetailsString);
+                setUserDetails(details);
+            }
+        } catch (error) {
+            console.error("Error loading user details:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleLogoutPress = async () => {
+        try {
+            await AsyncStorage.clear();
+            router.push("./(auth)/login");
+        } catch (error) {
+            console.error("Error during logout:", error);
+        }
     };
 
     const handlePurchasedProductsPress = () => {
-        router.push('./(user)/(tabs)/PurchasedProducts');
+        router.push("./(tabs)/PurchasedProducts");
     };
 
-    const handleLogoutPress = () => {
-        // Add logout logic here
+    const handleOrderHistoryPress = () => {
+        router.push("./(tabs)/OrderHistory");
     };
 
     const handleChangePasswordPress = () => {
         setModalVisible(true);
     };
 
+    if (isLoading) {
+        return (
+            <View style={[styles.container, styles.centered]}>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.userInfo}>
-
-            <FontAwesome name="user-circle" size={60} color="#4caf50"/>
+                <FontAwesome name="user-circle" size={60} color="#4caf50"/>
                 <View style={{marginLeft: 10, flex: 1}}>
-                    <Text style={styles.username}>Thai Quoc</Text>
-                    <Text style={styles.infoText}>Phone: 0123456789</Text>
-                    <Text style={styles.infoText}>Email: godslayder2612003@gmail.com</Text>
+                    <Text style={styles.username}>
+                        {userDetails?.fullname || 'No name available'}
+                    </Text>
+                    <Text style={styles.infoText}>
+                        Phone: {userDetails?.numberphone || 'No phone available'}
+                    </Text>
+                    <Text style={styles.infoText}>
+                        Email: {userDetails?.email || 'No email available'}
+                    </Text>
                 </View>
                 <TouchableOpacity onPress={handleChangePasswordPress}>
                     <Text style={styles.changePasswordLink}>Change Password</Text>
@@ -70,6 +122,10 @@ export default function UserDashboard() {
 }
 
 const styles = StyleSheet.create({
+    centered: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',

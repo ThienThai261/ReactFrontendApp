@@ -1,27 +1,22 @@
-import {Tabs} from 'expo-router';
-import React from 'react';
+// App.tsx (or Navigation Setup File)
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import OrderHistory from "@/app/(tabs)/(user)/(tabs)/OrderHistory";
+import PurchasedProducts from "@/app/(tabs)/(user)/(tabs)/PurchasedProducts";
 
-export default function UserTabsLayout() {
+
+const Stack = createStackNavigator();
+
+const App = () => {
     return (
-        <Tabs screenOptions={{headerShown: true}}>
-            <Tabs.Screen
-                name="index"
-                options={{
-                    title: 'User Profile'
-                }}
-            />
-            <Tabs.Screen
-                name="(tabs)/OrderHistory"
-                options={{
-                    title: 'Order History'
-                }}
-            />
-            <Tabs.Screen
-                name="(tabs)/PurchasedProducts"
-                options={{
-                    title: 'Purchased Products'
-                }}
-            />
-        </Tabs>
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName="SomeScreen">
+                <Stack.Screen name="SomeScreen" component={OrderHistory} />
+                <Stack.Screen name="AnotherScreen" component={PurchasedProducts} />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
-}
+};
+
+export default App;
