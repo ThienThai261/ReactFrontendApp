@@ -1,6 +1,6 @@
-import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import {router} from "expo-router";
+import { router } from "expo-router";
 
 
 export default function AdminDashboard() {
@@ -13,7 +13,7 @@ export default function AdminDashboard() {
         router.push("./(LoginAndRegister)/Login"); // Correctly routes to the index within the (auth) group
     };
     const handledetailPress = () => {
-        router.push("./products/detail")
+        router.push("./home/Home");
     }
     const handleCartPress = () => {
         router.push("./(cart)/CartScreen")
