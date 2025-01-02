@@ -4,6 +4,7 @@ import {MaterialIcons, FontAwesome} from '@expo/vector-icons';
 import {router} from 'expo-router';
 import HamburgerButton from "@/components/ui/HamburgerButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {handleLogout} from "@/app/(tabs)/(user)/(tabs)/handleLogout";
 interface UserDetails {
     username: string;
     email: string;
@@ -42,12 +43,7 @@ export default function UserDashboard() {
     };
 
     const handleLogoutPress = async () => {
-        try {
-            await AsyncStorage.clear();
-            router.push("./(auth)/login");
-        } catch (error) {
-            console.error("Error during logout:", error);
-        }
+        await handleLogout();
     };
 
     const handlePurchasedProductsPress = () => {

@@ -1,29 +1,46 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useLocalSearchParams } from 'expo-router'
+import {View, Text, Image, StyleSheet, TouchableOpacity, Alert} from 'react-native'
+import React, {useState} from 'react'
 import { ScrollView } from 'react-native';
-import axios from 'axios';
-import { useRoute } from '@react-navigation/native';
+import {useRoute, RouteProp} from '@react-navigation/native';
+import {useCart} from '@/app/(tabs)/(cart)/CartContent';
 
-//const Detail = () => {
+// Define the type for your product item
+interface ProductItem {
+    id: number;
+    name: string;
+    price: number;
+    size: string;
+    quantity: number;
+    material: string;
+    gender: string;
+    status: string;
+    id_category: number;
+    thumbnailUrl: string;
+    imageUrls: string[];
+}
+
+// Define the type for route params
+type DetailRouteParams = {
+    Detail: {
+        item: ProductItem;
+    };
+};
+
 export default function Detail() {
-    const route = useRoute()
-    const item = route.params.item
+    const route = useRoute<RouteProp<DetailRouteParams, 'Detail'>>();
+    const item = route.params.item;
+    const {addToCart} = useCart();
 
-    function processString(inputString) {
+    const [selectedSize, setSelectedSize] = useState<string | null>(null);
+    const [selectedColor, setSelectedColor] = useState<string | null>(null);
+
+    function processString(inputString: string | undefined): string[] {
         if (inputString) {
-            // Chia chuỗi thành mảng các phần tử
             const elements = inputString.split(',');
-
-            // Xử lý từng phần tử: loại bỏ khoảng trắng và chuyển thành chữ thường
-            const processedElements = elements.map(element => element.trim());
-            return processedElements;
-
-        } else console.error("Input string is undefined")
+            return elements.map(element => element.trim());
+        }
+        return [];
     }
-
-    const [selectedSize, setSelectedSize] = useState(null)
-    const [selectedColor, setSelectedColor] = useState(null)
 
     const colorsArray = [
         "#91A1B0",
@@ -32,18 +49,57 @@ export default function Detail() {
         "#9F632A",
         "#1D752B",
         "#000000",
-    ]
+    ] as const;
+
+    const handleAddToCart = () => {
+        if (!selectedSize) {
+            Alert.alert('Error', 'Please select a size');
+            return;
+        }
+        if (!selectedColor) {
+            Alert.alert('Error', 'Please select a color');
+            return;
+        }
+
+        const productWithOptions = {
+            ...item,
+            selectedSize,
+            selectedColor,
+            id: `${item.id}-${selectedSize}-${selectedColor}`, // Create unique ID for different variations
+        };
+
+        try {
+            addToCart(productWithOptions);
+            Alert.alert('Success', 'Item added to cart!');
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            Alert.alert('Error', 'Failed to add item to cart');
+        }
+    };
+
+    const handleBuyNow = () => {
+        if (!selectedSize || !selectedColor) {
+            Alert.alert('Error', 'Please select both size and color');
+            return;
+        }
+
+        handleAddToCart();
+        // Add navigation to checkout here
+        // router.push('/checkout');
+    };
 
     return (
         <ScrollView>
-
             <View style={styles.container}>
                 <View style={styles.header}>
                     {/* <Header /> */}
                 </View>
 
                 {/* IMG detail */}
-                <Image source={require('@/assets/images/react-logo.png')} style={styles.imageContainer} />
+                <Image
+                    source={require('@/assets/images/react-logo.png')}
+                    style={styles.imageContainer}
+                />
 
                 {/* Info */}
                 <View style={styles.contentContainer}>
@@ -54,54 +110,63 @@ export default function Detail() {
                 {/* Sizes */}
                 <Text style={[styles.title, styles.sizeText]}>Size</Text>
                 <View style={styles.sizeContainer}>
-                    {processString(item.size).map((size) => {
-                        return (
-                            <TouchableOpacity style={styles.sizeValueContainer}
-                                onPress={() => {
-                                    setSelectedSize(size)
-                                }}>
-                                <Text style={[
-                                    styles.sizeValue,
-                                    selectedSize == size && { color: "#E55B5B" }]}>{size}</Text>
-                            </TouchableOpacity>
-                        )
-                    })}
+                    {processString(item.size).map((size, index) => (
+                        <TouchableOpacity
+                            key={`size-${index}`}
+                            style={[
+                                styles.sizeValueContainer,
+                                selectedSize === size && styles.selectedSizeContainer
+                            ]}
+                            onPress={() => setSelectedSize(size)}
+                        >
+                            <Text style={[
+                                styles.sizeValue,
+                                selectedSize === size && styles.selectedText
+                            ]}>
+                                {size}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
 
                 {/* Colors */}
                 <Text style={[styles.title, styles.colorText]}>Colors</Text>
                 <View style={styles.colorContainer}>
-                    {
-                        colorsArray.map((color) => {
-                            return (
-                                <TouchableOpacity style={[styles.circleBorder, selectedColor === color && { borderColor: color, borderWidth: 2 }]}
-                                    onPress={() => {
-                                        setSelectedColor(color)
-                                    }}>
-                                    <View style={[styles.circle, { backgroundColor: color }]}></View>
-                                </TouchableOpacity>
-                            )
-                        })
-                    }
+                    {colorsArray.map((color, index) => (
+                        <TouchableOpacity
+                            key={`color-${index}`}
+                            style={[
+                                styles.circleBorder,
+                                selectedColor === color && {borderColor: color, borderWidth: 2}
+                            ]}
+                            onPress={() => setSelectedColor(color)}
+                        >
+                            <View style={[styles.circle, {backgroundColor: color}]}/>
+                        </TouchableOpacity>
+                    ))}
                 </View>
 
                 <View style={styles.btn}>
                     {/* Buy */}
-                    <TouchableOpacity style={styles.button}>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={handleBuyNow}
+                    >
                         <Text style={styles.buttonText}>Buy</Text>
                     </TouchableOpacity>
 
                     {/* Add to cart */}
-                    <TouchableOpacity style={styles.button}>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={handleAddToCart}
+                    >
                         <Text style={styles.buttonText}>Add To Cart</Text>
                     </TouchableOpacity>
                 </View>
             </View>
         </ScrollView>
-    )
+    );
 }
-
-//export default Detail
 
 const styles = StyleSheet.create({
     container: {
@@ -115,7 +180,6 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     contentContainer: {
-        //flexDirection: "row",
         justifyContent: "space-between",
         marginHorizontal: 20,
         marginVertical: 20,
@@ -141,11 +205,15 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         height: 36,
         width: 50,
-        //width: "100%",
         borderRadius: 18,
         justifyContent: "center",
         alignItems: "center",
         marginHorizontal: 10,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    selectedSizeContainer: {
+        borderColor: "#E55B5B",
     },
     sizeValue: {
         fontSize: 18,
@@ -192,6 +260,5 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: "#FFF",
         fontWeight: "700",
-        //marginHorizontal: "20%",
     },
 });

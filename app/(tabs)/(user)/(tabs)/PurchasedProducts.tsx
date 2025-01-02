@@ -7,25 +7,22 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-
-interface Product {
-    product: {
-        id: string;
-        name: string;
-        price: number;
-        quantity: number;
-        material?: string;
-        size?: string;
-    };
-    imageUrls: string[];
-    thumbnailUrl: string;
-}
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ReturnButton from "@/components/ui/ReturnButton";
 
 interface PurchasedProduct {
+    orderId: string;
     productId: string;
-    totalQuantity: number;
-    lastPurchaseDate: string;
-    productDetails: Product | null;
+    productName: string;
+    quantity: number;
+    price: number;
+    material: string;
+    size: string;
+    gender: string;
+    categoryId: number;
+    thumbnailUrl: string;
+    orderStatus: number;
+    orderDate: string;
 }
 
 const PurchasedProducts = () => {
@@ -40,49 +37,28 @@ const PurchasedProducts = () => {
     const fetchPurchasedProducts = async () => {
         try {
             setLoading(true);
-            // Fetch all orders first
-            const ordersResponse = await axios.get('http://192.168.0.107:9093/order/all');
-            const orders = ordersResponse.data;
-
-            // Create a map to store product purchase info
-            const productMap = new Map<string, PurchasedProduct>();
-
-            // Process all orders to get product purchase history
-            for (const order of orders) {
-                for (const detail of order.orderDetails) {
-                    const existing = productMap.get(detail.idProduct);
-                    if (existing) {
-                        existing.totalQuantity += detail.quantity;
-                        if (order.dateBuy > existing.lastPurchaseDate) {
-                            existing.lastPurchaseDate = order.dateBuy;
-                        }
-                    } else {
-                        productMap.set(detail.idProduct, {
-                            productId: detail.idProduct,
-                            totalQuantity: detail.quantity,
-                            lastPurchaseDate: order.dateBuy,
-                            productDetails: null
-                        });
-                    }
-                }
+            const token = await AsyncStorage.getItem('userDetails');
+            if (!token) {
+                throw new Error('User is not logged in');
             }
 
-            // Fetch product details for each purchased product
-            const productsWithDetails = await Promise.all(
-                Array.from(productMap.values()).map(async (item) => {
-                    try {
-                        const productResponse = await axios.get(`http://192.168.0.107:9093/product/${item.productId}`);
-                        return {
-                            ...item,
-                            productDetails: productResponse.data
-                        };
-                    } catch (err) {
-                        return item;
-                    }
-                })
+            const userDetails = JSON.parse(token);
+            const accountId = userDetails.id;
+
+            const response = await axios.get(
+                `http://192.168.0.107:9093/purchases/user/${accountId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
             );
 
-            setPurchasedProducts(productsWithDetails);
+            if (response.status === 200) {
+                setPurchasedProducts(response.data);
+            } else {
+                throw new Error('Failed to fetch purchased products');
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -95,24 +71,28 @@ const PurchasedProducts = () => {
 
     return (
         <View style={styles.container}>
+            <ReturnButton/>
             <Text style={styles.title}>Purchased Products</Text>
             <FlatList
                 data={purchasedProducts}
-                keyExtractor={(item) => item.productId}
+                keyExtractor={(item) => `${item.orderId}-${item.productId}`}
                 renderItem={({item}) => (
                     <View style={styles.productCard}>
-                        <Text style={styles.productName}>
-                            {item.productDetails?.product.name || 'Unknown Product'}
-                        </Text>
-                        <Text>Total Purchased: {item.totalQuantity}</Text>
-                        <Text>Last Purchase: {new Date(item.lastPurchaseDate).toLocaleDateString()}</Text>
-                        <Text>Price: ${item.productDetails?.product.price || 'N/A'}</Text>
+                        <Text style={styles.productName}>{item.productName}</Text>
+                        <Text>Order ID: {item.orderId}</Text>
+                        <Text>Quantity: {item.quantity}</Text>
+                        <Text>Purchase Date: {new Date(item.orderDate).toLocaleDateString()}</Text>
+                        <Text>Price: ${item.price}</Text>
+                        {item.material && <Text>Material: {item.material}</Text>}
+                        {item.size && <Text>Size: {item.size}</Text>}
+                        {item.gender && <Text>Gender: {item.gender}</Text>}
                     </View>
                 )}
             />
         </View>
     );
 };
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -130,34 +110,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
     },
-    orderCard: {
-        backgroundColor: 'white',
-        padding: 16,
-        borderRadius: 8,
-        marginBottom: 12,
-        elevation: 2,
-    },
-    orderHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    orderId: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    statusBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
-        color: 'white',
-    },
-    totalPrice: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginTop: 8,
-    },
     productCard: {
         backgroundColor: 'white',
         padding: 16,
@@ -169,6 +121,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 8,
-    },
+    }
 });
+
 export default PurchasedProducts;

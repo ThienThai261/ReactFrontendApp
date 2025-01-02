@@ -1,35 +1,63 @@
-import { Text, View, StyleSheet, FlatList, ScrollView, Image, TouchableOpacity } from "react-native";
+import {
+    Text,
+    View,
+    StyleSheet,
+    FlatList,
+    ScrollView,
+    Image,
+    TouchableOpacity,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import Category from "./screen/Category";
-import axios from 'axios';
+import axios from "axios";
 import ProductCart from "./screen/ProductCart";
-import Fontisto from "react-native-vector-icons/Fontisto"
+import Fontisto from "react-native-vector-icons/Fontisto";
+
+// Define types for Category and Product
+type CategoryType = {
+    id: number;
+    name: string;
+};
+
+type ProductType = {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    material: string;
+    size: string;
+    gender: string;
+    status: string;
+    id_category: number;
+    thumbnailUrl: string;
+    imageUrls: string[];
+};
 
 export default function Home() {
-    const API = "http://192.168.1.141:8080"
+    const API = "http://192.168.0.107:9093";
 
-    const [cate, setCate] = useState([])
-    const [product, setProduct] = useState([]);
+    const [cate, setCate] = useState<CategoryType[]>([]);
+    const [product, setProduct] = useState<ProductType[]>([]);
 
-    const loadCate = async () => {
-        const result = await axios.get(`${API}/cate/all`);
-        setCate(result.data);
-    };
-
-    const loadProduct = async () => {
-        const result = await axios.get(`${API}/product/all`);
-        setProduct(result.data);
-    };
-
-    const [selectedCategory, setSelectedCategory] = useState(null)
-
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
+    // Fetch categories
+    const loadCate = async () => {
+        try {
+            const result = await axios.get<CategoryType[]>(`${API}/cate/all`);
+            setCate(result.data);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
+
+    // Fetch products and transform the data
     const fetchProducts = async () => {
         try {
-            const response = await axios.get(`${API}/product/all`);
+            const response = await axios.get<ProductType[]>(`${API}/product/all`);
             const transformedProducts = response.data.map((item: any) => ({
                 id: item.product.id,
                 name: item.product.name,
@@ -41,13 +69,13 @@ export default function Home() {
                 status: item.product.status,
                 id_category: item.product.idCategory,
                 thumbnailUrl: item.is_thumbnail_image,
-                imageUrls: item.source
+                imageUrls: item.source,
             }));
             setProduct(transformedProducts);
             setError(null);
         } catch (err: any) {
-            console.error('Error fetching (products):', err);
-            setError('Failed to fetch (products)');
+            console.error("Error fetching (products):", err);
+            setError("Failed to fetch (products)");
         } finally {
             setLoading(false);
         }
@@ -55,9 +83,8 @@ export default function Home() {
 
     useEffect(() => {
         loadCate();
-        loadProduct();
-        //fetchProducts();
-    }, [])
+        fetchProducts();
+    }, []);
 
     return (
         <ScrollView>
@@ -66,47 +93,54 @@ export default function Home() {
                 <Text style={styles.headingText}>Match Your Style</Text>
 
                 <View style={styles.inputContainer}>
-                    <Fontisto name="search" size={26} color={"#C0C0C0"} style={styles.searchIcon}></Fontisto>
-                    <TextInput style={styles.textInput} placeholder="Search"></TextInput>
+                    <Fontisto
+                        name="search"
+                        size={26}
+                        color={"#C0C0C0"}
+                        style={styles.searchIcon}
+                    />
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Search"
+                        placeholderTextColor="#C0C0C0"
+                    />
                 </View>
 
-                {/* Category section*/}
+                {/* Category section */}
                 <FlatList
                     data={cate}
                     renderItem={({ item }) => (
                         <Category
                             item={item.name}
                             selectedCategory={selectedCategory}
-                            setSelectedCategory={setSelectedCategory} />
+                            setSelectedCategory={setSelectedCategory}
+                        />
                     )}
-                    keyExtractor={(item) => item}
+                    keyExtractor={(item) => item.id.toString()}
                     horizontal={true}
-                    showsHorizontalScrollIndicator={true} >
-                </FlatList>
+                    showsHorizontalScrollIndicator={true}
+                />
 
                 {/* Banner */}
                 <View style={styles.banner}>
-                    <Image source={require("@/assets/images/react-logo.png")}></Image>
-                    <Image source={require("@/assets/images/react-logo.png")}></Image>
-                    <Image source={require("@/assets/images/react-logo.png")}></Image>
+                    <Image source={require("@/assets/images/react-logo.png")}/>
+                    <Image source={require("@/assets/images/react-logo.png")}/>
+                    <Image source={require("@/assets/images/react-logo.png")}/>
                 </View>
 
                 {/* Product List */}
-                <View style={{ flexDirection: "row", }} >
+                <View style={{flexDirection: "row"}}>
                     <FlatList
                         data={product.slice(0, 20)}
-                        renderItem={({ item }) => (
-                            <ProductCart
-                                item={item} />
-                        )}
-                        keyExtractor={(item) => item.id.toString}
+                        renderItem={({item}) => <ProductCart item={item}/>}
+                        keyExtractor={(item) => item.id.toString()}
                         numColumns={2}
                         showsHorizontalScrollIndicator={true}
-                        style={styles.list}>
-                    </FlatList>
+                        style={styles.list}
+                    />
                 </View>
-            </View >
-        </ScrollView >
+            </View>
+        </ScrollView>
     );
 }
 
@@ -125,7 +159,7 @@ const styles = StyleSheet.create({
         marginEnd: 10,
         flexDirection: "row",
         height: 100,
-        backgroundColor: "#000"
+        backgroundColor: "#000",
     },
     inputContainer: {
         width: "100%",
@@ -143,10 +177,7 @@ const styles = StyleSheet.create({
     },
     textInput: {
         flex: 1,
-        //borderWidth: 1,
-        //borderColor: "black",
         fontSize: 18,
-        //fontFamily: "Poppins-Regular",
-        color: "#C0C0C0"
+        color: "#000",
     },
 });

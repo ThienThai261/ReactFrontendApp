@@ -1,199 +1,234 @@
-import {View, Text, ScrollView, StyleSheet, TextInput, Modal, TouchableOpacity} from 'react-native';
-import React, {useState} from 'react';
-import {MaterialIcons, FontAwesome} from '@expo/vector-icons';
-import {router} from 'expo-router';
-import HamburgerButton from "@/components/ui/HamburgerButton";
+import {
+    Text,
+    View,
+    StyleSheet,
+    FlatList,
+    ScrollView,
+    Image,
+    TouchableOpacity,
+} from "react-native";
+import React, {useEffect, useState} from "react";
+import {TextInput} from "react-native-gesture-handler";
+import Category from "./home/screen/Category";
+import axios from "axios";
+import ProductCart from "./home/screen/ProductCart";
+import {useCart} from '@/app/(tabs)/(cart)/CartContent';
+import Fontisto from "react-native-vector-icons/Fontisto";
+import {router} from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function UserDashboard() {
-    const [isModalVisible, setModalVisible] = useState(false);
+// Define types for Category and Product
+type CategoryType = {
+    id: number;
+    name: string;
+};
 
-    const handleOrderHistoryPress = () => {
-        router.push('./(user)/(tabs)/OrderHistory');
+type ProductType = {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    material: string;
+    size: string;
+    gender: string;
+    status: string;
+    id_category: number;
+    thumbnailUrl: string;
+    imageUrls: string[];
+};
+
+export default function Home() {
+    const API = "http://192.168.0.107:9093";
+
+    const [cate, setCate] = useState<CategoryType[]>([]);
+    const [product, setProduct] = useState<ProductType[]>([]);
+
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    // Fetch categories
+    const loadCate = async () => {
+        try {
+            const result = await axios.get<CategoryType[]>(`${API}/cate/all`);
+            setCate(result.data);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
     };
 
-    const handlePurchasedProductsPress = () => {
-        router.push('./(user)/(tabs)/PurchasedProducts');
+    // Fetch products and transform the data
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get<ProductType[]>(`${API}/product/all`);
+            const transformedProducts = response.data.map((item: any) => ({
+                id: item.product.id,
+                name: item.product.name,
+                price: item.product.price,
+                quantity: item.product.quantity,
+                material: item.product.material,
+                size: item.product.size,
+                gender: item.product.gender,
+                status: item.product.status,
+                id_category: item.product.idCategory,
+                thumbnailUrl: item.is_thumbnail_image,
+                imageUrls: item.source,
+            }));
+            setProduct(transformedProducts);
+            setError(null);
+        } catch (err: any) {
+            console.error("Error fetching (products):", err);
+            setError("Failed to fetch (products)");
+        } finally {
+            setLoading(false);
+        }
     };
-    const handleAdminPress = () => {
-        router.push('./(admin)/');
+    const handleCartPress = () => {
+        router.push("./(tabs)/(cart)/");
     };
 
-    const handleLogoutPress = () => {
-        // Add logout logic here
+    // Handle navigation based on login status
+    const handleProfilePress = async () => {
+        try {
+            const userDetails = await AsyncStorage.getItem("userDetails");
+            if (userDetails) {
+                // User is logged in, navigate to user detail screen
+                router.push("./(tabs)/(user)/userDetail");
+            } else {
+                // User is not logged in, navigate to login screen
+                router.push("./(LoginAndRegister)/Login");
+            }
+        } catch (error) {
+            console.error("Error checking login status:", error);
+            router.push("./(auth)/login"); // Fallback to login screen
+        }
     };
 
-    const handleChangePasswordPress = () => {
-        setModalVisible(true);
-    };
+    useEffect(() => {
+        loadCate();
+        fetchProducts();
+    }, []);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.userInfo}>
-
-                <FontAwesome name="user-circle" size={60} color="#4caf50"/>
-                <View style={{marginLeft: 10, flex: 1}}>
-                    <Text style={styles.username}>Thai Quoc</Text>
-                    <Text style={styles.infoText}>Phone: 0123456789</Text>
-                    <Text style={styles.infoText}>Email: godslayder2612003@gmail.com</Text>
+        <ScrollView>
+            <View style={styles.container}>
+                {/* Header Section */}
+                <View style={styles.header}>
+                    <Text style={styles.headingText}>Match Your Style</Text>
+                    <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
+                        <Fontisto name="person" size={24} color="#fff"/>
+                        <Text style={styles.profileButtonText}>Profile</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.profileButton} onPress={handleCartPress}>
+                        <Fontisto name="person" size={24} color="#fff"/>
+                        <Text style={styles.profileButtonText}>Cart</Text>
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={handleChangePasswordPress}>
-                    <Text style={styles.changePasswordLink}>Change Password</Text>
-                </TouchableOpacity>
+
+                {/* Input container */}
+                <View style={styles.inputContainer}>
+                    <Fontisto
+                        name="search"
+                        size={26}
+                        color={"#C0C0C0"}
+                        style={styles.searchIcon}
+                    />
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Search"
+                        placeholderTextColor="#C0C0C0"
+                    />
+                </View>
+
+                {/* Category section */}
+                <FlatList
+                    data={cate}
+                    renderItem={({item}) => (
+                        <Category
+                            item={item.name}
+                            selectedCategory={selectedCategory}
+                            setSelectedCategory={setSelectedCategory}
+                        />
+                    )}
+                    keyExtractor={(item) => item.id.toString()}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={true}
+                />
+
+                {/* Banner */}
+                <View style={styles.banner}>
+                    <Image source={require("@/assets/images/react-logo.png")}/>
+                    <Image source={require("@/assets/images/react-logo.png")}/>
+                    <Image source={require("@/assets/images/react-logo.png")}/>
+                </View>
+
+                {/* Product List */}
+                <View style={{flexDirection: "row"}}>
+                    <FlatList
+                        data={product.slice(0, 20)}
+                        renderItem={({item}) => <ProductCart item={item}/>}
+                        keyExtractor={(item) => item.id.toString()}
+                        numColumns={2}
+                        showsHorizontalScrollIndicator={true}
+                        style={styles.list}
+                    />
+                </View>
             </View>
-
-            <ScrollView style={styles.buttonContainer}>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleOrderHistoryPress}
-                >
-                    <MaterialIcons name="receipt" size={20} color="#fff"/>
-                    <Text style={styles.buttonText}>Order History</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handlePurchasedProductsPress}
-                >
-                    <MaterialIcons name="visibility" size={20} color="#fff"/>
-                    <Text style={styles.buttonText}>Purchased Products</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleAdminPress}
-                >
-                    <MaterialIcons name="visibility" size={20} color="#fff"/>
-                    <Text style={styles.buttonText}>Admin</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.button, styles.logoutButton]}
-                    onPress={handleLogoutPress}
-                >
-                    <MaterialIcons name="logout" size={20} color="#fff"/>
-                    <Text style={styles.buttonText}>Logout</Text>
-                </TouchableOpacity>
-            </ScrollView>
-
-            {/* Modal remains the same */}
-        </View>
+        </ScrollView>
     );
 }
-
 const styles = StyleSheet.create({
-    titleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    stepContainer: {
-        gap: 8,
-        marginBottom: 8,
-    },
-    reactLogo: {
-        height: 178,
-        width: 290,
-        bottom: 0,
-        left: 0,
-        position: 'absolute',
-    },
     container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
+        padding: 20,
     },
     header: {
-        position: 'absolute',
-        top: 40,
-        left: 20,
-        zIndex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
     },
-    userInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 15,
-        backgroundColor: '#fff',
-        marginBottom: 16,
-        elevation: 2,
-    },
-    username: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    infoText: {
-        color: 'gray',
-        fontSize: 14,
-        marginBottom: 2,
-    },
-    changePasswordLink: {
-        color: '#4caf50',
-        textDecorationLine: 'underline',
-        fontSize: 14,
-    },
-    buttonContainer: {
-        padding: 16,
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#4caf50',
-        padding: 16,
+    profileButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#4caf50",
+        padding: 8,
         borderRadius: 8,
-        marginBottom: 16,
     },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginLeft: 10,
+    profileButtonText: {
+        color: "#fff",
+        marginLeft: 5,
+        fontWeight: "bold",
     },
-    logoutButton: {
-        backgroundColor: '#f44336',
+    list: {flex: 1},
+    headingText: {
+        fontSize: 28,
+        color: "#000000",
+        marginVertical: 20,
     },
-    modalContainer: {
+    banner: {
+        marginTop: 10,
+        marginEnd: 10,
+        flexDirection: "row",
+        height: 100,
+        backgroundColor: "#000",
+    },
+    inputContainer: {
+        width: "100%",
+        backgroundColor: "#FFFFFF",
+        marginVertical: 20,
+        height: 48,
+        borderRadius: 12,
+        alignItems: "center",
+        flexDirection: "row",
+    },
+    searchIcon: {
+        height: 26,
+        width: 26,
+        marginHorizontal: 15,
+    },
+    textInput: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-        width: '80%',
-        padding: 20,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        elevation: 5,
-    },
-    modalTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        padding: 10,
-        marginBottom: 12,
-    },
-    sendCodeButton: {
-        padding: 12,
-        backgroundColor: '#4caf50',
-        alignItems: 'center',
-        borderRadius: 5,
-        marginBottom: 12,
-    },
-    sendCodeText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    closeButton: {
-        padding: 12,
-        backgroundColor: '#f44336',
-        alignItems: 'center',
-        borderRadius: 5,
-    },
-    closeButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+        color: "#000",
     },
 });

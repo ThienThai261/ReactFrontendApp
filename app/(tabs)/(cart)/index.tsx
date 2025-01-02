@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {router} from "expo-router";
 import {
     View,
@@ -8,54 +8,25 @@ import {
     TouchableOpacity,
     FlatList,
 } from 'react-native';
+import {useCart} from './CartContent';
 
 const Index = () => {
-    const [cartItems, setCartItems] = useState([
-        {
-            id: '1',
-            name: 'FRANCE AUTHENTIC JERSEY 2018 (L) (HOME)',
-            brand: 'NIKE',
-            price: 165,
-            quantity: 1,
-        },
-        {
-            id: '2',
-            name: 'FRANCE AUTHENTIC JERSEY 2018 (L) (HOME)',
-            brand: 'NIKE',
-            price: 165,
-            quantity: 1,
-        },
-        {
-            id: '3',
-            name: 'FRANCE AUTHENTIC JERSEY 2018 (L) (HOME)',
-            brand: 'NIKE',
-            price: 165,
-            quantity: 1,
-        },
-    ]);
+    const {cartItems, removeFromCart, updateQuantity, getCartTotal} = useCart();
 
     const handleQuantityChange = (id, increment) => {
-        setCartItems((prevItems) =>
-            prevItems.map((item) =>
-                item.id === id
-                    ? {
-                        ...item,
-                        quantity: Math.max(1, item.quantity + (increment ? 1 : -1)),
-                    }
-                    : item
-            )
-        );
+        updateQuantity(id, increment);
     };
+
     const handleCheckOutPress = () => {
-        router.push("./CheckOutScreen"); // Correctly routes to the index within the (auth) group
+        router.push("./CheckOutScreen");
     };
 
     const handleRemoveItem = (id) => {
-        setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+        removeFromCart(id);
     };
 
     const calculateTotal = () => {
-        return cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        return getCartTotal();
     };
 
     const renderItem = ({item}) => (
@@ -98,7 +69,7 @@ const Index = () => {
             <FlatList
                 data={cartItems}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()}
             />
             <View style={styles.summaryContainer}>
                 <Text style={styles.summaryText}>Subtotal</Text>
@@ -110,10 +81,9 @@ const Index = () => {
                 <Text style={styles.totalText}>Total</Text>
                 <Text style={styles.totalValue}>${calculateTotal()}</Text>
             </View>
-            <TouchableOpacity onPress={() => handleCheckOutPress} style={styles.checkoutButton}>
+            <TouchableOpacity onPress={handleCheckOutPress} style={styles.checkoutButton}>
                 <Text style={styles.checkoutText}>CONTINUE TO CHECKOUT</Text>
             </TouchableOpacity>
-
         </View>
     );
 };
