@@ -9,8 +9,12 @@ import {
     FlatList,
 } from 'react-native';
 import {useCart} from './CartContent';
+import { ImageIcon } from "lucide-react";
+import Header from "@/components/ui/Header";
 
-const Index = () => {
+const API = "http://192.168.0.107:9093";
+
+const Cart = () => {
     const {cartItems, removeFromCart, updateQuantity, getCartTotal} = useCart();
 
     const handleQuantityChange = (id, increment) => {
@@ -29,39 +33,54 @@ const Index = () => {
         return getCartTotal();
     };
 
-    const renderItem = ({item}) => (
-        <View style={styles.itemContainer}>
-            <Image
-                source={require('@/assets/images/placeholder.jpg')}
-                style={styles.image}
-            />
-            <View style={styles.itemDetails}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemBrand}>{item.brand}</Text>
-                <View style={styles.quantityContainer}>
-                    <TouchableOpacity
-                        style={styles.quantityButton}
-                        onPress={() => handleQuantityChange(item.id, false)}
-                    >
-                        <Text style={styles.quantityText}>-</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.quantity}>{item.quantity}</Text>
-                    <TouchableOpacity
-                        style={styles.quantityButton}
-                        onPress={() => handleQuantityChange(item.id, true)}
-                    >
-                        <Text style={styles.quantityText}>+</Text>
+    const renderItem = ({item}) => {
+        // Handle image source based on thumbnailUrl or fallback
+        const imageSource = item.thumbnailUrl
+            ? { uri: `${API}${item.thumbnailUrl}` }
+            : require('@/assets/images/react-logo.png');
+
+        return (
+
+            <View style={styles.itemContainer}>
+                {item.thumbnailUrl ? (
+                    <Image
+                        source={imageSource}
+                        style={styles.image}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    <View style={[styles.image, styles.placeholderContainer]}>
+                        <ImageIcon size={30} color="#999" />
+                    </View>
+                )}
+                <View style={styles.itemDetails}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style={styles.itemBrand}>{item.brand}</Text>
+                    <View style={styles.quantityContainer}>
+                        <TouchableOpacity
+                            style={styles.quantityButton}
+                            onPress={() => handleQuantityChange(item.id, false)}
+                        >
+                            <Text style={styles.quantityText}>-</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.quantity}>{item.quantity}</Text>
+                        <TouchableOpacity
+                            style={styles.quantityButton}
+                            onPress={() => handleQuantityChange(item.id, true)}
+                        >
+                            <Text style={styles.quantityText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={styles.itemPriceContainer}>
+                    <Text style={styles.itemPrice}>${item.price}</Text>
+                    <TouchableOpacity onPress={() => handleRemoveItem(item.id)}>
+                        <Text style={styles.removeText}>🗑</Text>
                     </TouchableOpacity>
                 </View>
             </View>
-            <View style={styles.itemPriceContainer}>
-                <Text style={styles.itemPrice}>${item.price}</Text>
-                <TouchableOpacity onPress={() => handleRemoveItem(item.id)}>
-                    <Text style={styles.removeText}>🗑</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -110,6 +129,12 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         marginRight: 10,
+        borderRadius: 8,
+        backgroundColor: '#f5f5f5',
+    },
+    placeholderContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     itemDetails: {
         flex: 1,
@@ -183,4 +208,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Index;
+export default Cart;

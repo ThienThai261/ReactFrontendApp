@@ -5,6 +5,7 @@ import {router} from 'expo-router';
 import HamburgerButton from "@/components/ui/HamburgerButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {handleLogout} from "@/app/(tabs)/(user)/(tabs)/handleLogout";
+import Header from "@/components/ui/Header";
 interface UserDetails {
     username: string;
     email: string;
@@ -68,6 +69,7 @@ export default function UserDashboard() {
 
     return (
         <View style={styles.container}>
+            <Header title="Match Your Style" />
             <View style={styles.userInfo}>
                 <FontAwesome name="user-circle" size={60} color="#4caf50"/>
                 <View style={{marginLeft: 10, flex: 1}}>

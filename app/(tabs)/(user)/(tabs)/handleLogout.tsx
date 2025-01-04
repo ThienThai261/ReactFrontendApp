@@ -16,7 +16,7 @@ export const handleLogout = async () => {
         ]);
 
         // Navigate to login
-        router.replace('.//(LoginAndRegister)/Login');
+        router.replace('../');
     } catch (error) {
         console.error('Logout error:', error);
         // Still attempt to navigate even if clearing fails

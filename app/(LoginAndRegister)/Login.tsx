@@ -59,6 +59,9 @@ export default function LoginAndRegister({navigation}) {
             handleLoginError(err);
         }
     };
+    const handlePressSignIn = () => {
+        router.push('./SignUp');
+    };
     const handleLoginError = (err) => {
         if (axios.isAxiosError(err)) {
             if (err.response) {
@@ -148,7 +151,7 @@ export default function LoginAndRegister({navigation}) {
                     </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                <TouchableOpacity onPress={handlePressSignIn}>
                     <Text style={styles.signUpText}>Or Sign Up Using</Text>
                 </TouchableOpacity>
             </View>

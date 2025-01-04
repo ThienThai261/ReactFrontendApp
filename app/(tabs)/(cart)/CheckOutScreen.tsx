@@ -1,7 +1,124 @@
-import React from 'react';
-import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    Alert
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCart } from './CartContent';
+import { router } from 'expo-router';
 
-const CheckoutScreen = ({navigation}: { navigation: any }) => {
+const API = "http://192.168.0.107:9093";
+
+const CheckoutScreen = () => {
+    const { cartItems, getCartTotal } = useCart();
+    const [userId, setUserId] = useState<number | null>(null);
+    const [formData, setFormData] = useState({
+        email: '',
+        fullName: '',
+        address: '',
+        aptSuite: '',
+        zipCode: '',
+        phoneNumber: '',
+    });
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        checkAuthStatus();
+    }, []);
+
+    const checkAuthStatus = async () => {
+        try {
+            const userDetails = await AsyncStorage.getItem('userDetails');
+            if (userDetails) {
+                const user = JSON.parse(userDetails);
+                setUserId(user.id);
+            } else {
+                Alert.alert(
+                    'Authentication Required',
+                    'Please login to continue with checkout',
+                    [
+                        { text: 'OK', onPress: () => router.push('/(LoginAndRegister)/Login') }
+                    ]
+                );
+            }
+        } catch (error) {
+            console.error('Error checking auth status:', error);
+        }
+    };
+
+    const validateForm = () => {
+        if (!formData.email || !formData.fullName || !formData.address ||
+            !formData.zipCode || !formData.phoneNumber) {
+            Alert.alert('Error', 'Please fill in all required fields');
+            return false;
+        }
+        if (!formData.email.includes('@')) {
+            Alert.alert('Error', 'Please enter a valid email address');
+            return false;
+        }
+        if (formData.zipCode.length < 5) {
+            Alert.alert('Error', 'Please enter a valid ZIP code');
+            return false;
+        }
+        return true;
+    };
+
+    const createOrder = async () => {
+        if (!userId) {
+            Alert.alert('Error', 'Please login to continue');
+            return;
+        }
+
+        if (!validateForm()) return;
+
+        setLoading(true);
+        try {
+            const orderDetails = cartItems.map(item => ({
+                idProduct: item.id,
+                quantity: item.quantity,
+                price: item.price
+            }));
+
+            const orderData = {
+                address: `${formData.address} ${formData.aptSuite} ${formData.zipCode}`,
+                numberPhone: formData.phoneNumber,
+                idAccount: userId,
+                orderDetails: orderDetails
+            };
+
+            const response = await fetch(`${API}/order/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create order');
+            }
+
+            const result = await response.json();
+            Alert.alert(
+                'Success',
+                'Order placed successfully!',
+                [
+                    { text: 'OK', onPress: () => router.push('./(tabs)') }
+                ]
+            );
+        } catch (error) {
+            console.error('Error creating order:', error);
+            Alert.alert('Error', 'Failed to create order. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <ScrollView style={styles.container}>
             <Text style={styles.header}>Checkout</Text>
@@ -16,49 +133,80 @@ const CheckoutScreen = ({navigation}: { navigation: any }) => {
 
             <TouchableOpacity style={styles.cartDetailsButton}>
                 <Text style={styles.cartDetailsText}>Show cart details</Text>
-                <Text style={styles.cartAmount}>$165</Text>
+                <Text style={styles.cartAmount}>${getCartTotal()}</Text>
             </TouchableOpacity>
 
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Email</Text>
-                <TextInput style={styles.input} placeholder="bdelhamid@email.com" keyboardType="email-address"/>
-                <Text style={styles.link}>Already have an account? Log in</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="email@example.com"
+                    keyboardType="email-address"
+                    value={formData.email}
+                    onChangeText={(text) => setFormData({...formData, email: text})}
+                />
             </View>
 
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Full Name</Text>
-                <TextInput style={styles.input} placeholder="Abdelhamid Larachi"/>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter your full name"
+                    value={formData.fullName}
+                    onChangeText={(text) => setFormData({...formData, fullName: text})}
+                />
             </View>
 
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Address</Text>
-                <TextInput style={styles.input} placeholder="1060 W Addison St"/>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter your address"
+                    value={formData.address}
+                    onChangeText={(text) => setFormData({...formData, address: text})}
+                />
             </View>
 
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Apt, Suite, Bldg (optional)</Text>
-                <TextInput style={styles.input} placeholder="Building 14"/>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Optional"
+                    value={formData.aptSuite}
+                    onChangeText={(text) => setFormData({...formData, aptSuite: text})}
+                />
             </View>
 
             <View style={styles.row}>
-                <TextInput style={[styles.input, styles.zipInput]} placeholder="15900" keyboardType="numeric"/>
+                <TextInput
+                    style={[styles.input, styles.zipInput]}
+                    placeholder="ZIP"
+                    keyboardType="numeric"
+                    value={formData.zipCode}
+                    onChangeText={(text) => setFormData({...formData, zipCode: text})}
+                />
                 <Text style={styles.city}>Chicago, IL</Text>
-                <TouchableOpacity style={styles.addButton}>
-                    <Text style={styles.addButtonText}>+</Text>
-                </TouchableOpacity>
             </View>
 
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Phone Number</Text>
-                <TextInput style={styles.input} placeholder="(123) 456 - 7890" keyboardType="phone-pad"/>
-                <Text style={styles.link}>Another number</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="(123) 456-7890"
+                    keyboardType="phone-pad"
+                    value={formData.phoneNumber}
+                    onChangeText={(text) => setFormData({...formData, phoneNumber: text})}
+                />
             </View>
 
             <TouchableOpacity
-                style={styles.checkoutButton}
-                onPress={() => navigation.navigate('Index')} // Change to your cart screen name
+                style={[styles.checkoutButton, loading && styles.disabledButton]}
+                onPress={createOrder}
+                disabled={loading}
             >
-                <Text style={styles.checkoutButtonText}>Continue to Payment</Text>
+                <Text style={styles.checkoutButtonText}>
+                    {loading ? 'Processing...' : 'Place Order'}
+                </Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -153,22 +301,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
-    addButton: {
-        backgroundColor: '#00bfff',
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderRadius: 10,
-    },
-    addButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    link: {
-        marginTop: 5,
-        fontSize: 14,
-        color: '#00bfff',
-        textDecorationLine: 'underline',
+    disabledButton: {
+        opacity: 0.7,
     },
     checkoutButton: {
         marginTop: 20,
@@ -176,7 +310,9 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         borderRadius: 10,
         alignItems: 'center',
+        marginBottom: 30,
     },
+
     checkoutButtonText: {
         color: '#fff',
         fontSize: 16,

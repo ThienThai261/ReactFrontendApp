@@ -21,27 +21,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({children}: { children: React.ReactNode }) => {
     const [cartItems, setCartItems] = useState<CartItem[]>([
-        {
-            id: '1',
-            name: 'FRANCE AUTHENTIC JERSEY 2018 (L) (HOME)',
-            brand: 'NIKE',
-            price: 165,
-            quantity: 1,
-        },
-        {
-            id: '2',
-            name: 'FRANCE AUTHENTIC JERSEY 2018 (L) (HOME)',
-            brand: 'NIKE',
-            price: 165,
-            quantity: 1,
-        },
-        {
-            id: '3',
-            name: 'FRANCE AUTHENTIC JERSEY 2018 (L) (HOME)',
-            brand: 'NIKE',
-            price: 165,
-            quantity: 1,
-        },
+
     ]);
 
     const addToCart = (product: any) => {
