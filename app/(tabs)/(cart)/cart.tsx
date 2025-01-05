@@ -9,7 +9,7 @@ import {
     FlatList,
 } from 'react-native';
 import {useCart} from './CartContent';
-import { ImageIcon } from "lucide-react";
+
 import Header from "@/components/ui/Header";
 
 const API = "http://192.168.0.107:9093";
@@ -40,7 +40,6 @@ const Cart = () => {
             : require('@/assets/images/react-logo.png');
 
         return (
-
             <View style={styles.itemContainer}>
                 {item.thumbnailUrl ? (
                     <Image
@@ -49,9 +48,7 @@ const Cart = () => {
                         resizeMode="cover"
                     />
                 ) : (
-                    <View style={[styles.image, styles.placeholderContainer]}>
-                        <ImageIcon size={30} color="#999" />
-                    </View>
+                    <View style={[styles.image, styles.placeholderContainer]}></View>
                 )}
                 <View style={styles.itemDetails}>
                     <Text style={styles.itemName}>{item.name}</Text>
@@ -84,11 +81,17 @@ const Cart = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Your Cart</Text>
+            {/* Header at the top */}
+            <View >
+                <Header />
+            </View>
+
+            {/* Content below the header */}
             <FlatList
                 data={cartItems}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={styles.contentContainer}
             />
             <View style={styles.summaryContainer}>
                 <Text style={styles.summaryText}>Subtotal</Text>
@@ -112,6 +115,18 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: '#fff',
+    },
+    contentContainer: {
+        paddingTop: 60, // Adjust for header height
+        paddingHorizontal: 20,
+    },
+    headerContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10, // Ensure the header is on top of other components
+        backgroundColor: '#fff', // Same background color as the page
     },
     header: {
         fontSize: 20,

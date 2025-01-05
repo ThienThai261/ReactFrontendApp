@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-na
 import { router } from "expo-router";
 import Feather from "react-native-vector-icons/Feather";
 import { useCart } from '@/app/(tabs)/(cart)/CartContent';
-import { ImageIcon } from "lucide-react";
+
 
 const API = "http://192.168.0.107:9093";
 
@@ -48,7 +48,7 @@ const ProductCart: React.FC<ProductCartProps> = ({ item }) => {
                     />
                 ) : (
                     <View style={[styles.coverImage, styles.placeholderContainer]}>
-                        <ImageIcon size={40} color="#999" />
+
                     </View>
                 )}
 
