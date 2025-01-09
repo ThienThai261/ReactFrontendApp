@@ -12,6 +12,7 @@ import {router} from "expo-router";
 import {LinearGradient} from "expo-linear-gradient";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
+import Header from "@/components/ui/Header";
 
 const API_BASE_URL = "http://192.168.0.107:9093/accounts";
 
@@ -42,14 +43,21 @@ export default function LoginAndRegister({navigation}) {
                     email: response.data.email,
                     fullname: response.data.fullname,
                     phone: response.data.phone,
-                    id: response.data.id
+                    id: response.data.id,
+                    role: response.data.role // Store the role as well
                 };
 
                 await AsyncStorage.setItem("userDetails", JSON.stringify(userDetails));
 
                 Alert.alert("Login Success", "Welcome!");
                 setError("");
-                router.push("../(tabs)/(user)/userDetail");
+
+                // Check role and redirect accordingly
+                if (response.data.role === 1) {
+                    router.push("../(tabs)/(user)/userDetail");
+                } else if (response.data.role === 0) {
+                    router.push("../(admin)/"); // Update this path to match your admin route
+                }
             } else {
                 setError(response.data.message || "Login failed");
                 Alert.alert("Login Failed", response.data.message);
@@ -83,6 +91,7 @@ export default function LoginAndRegister({navigation}) {
 
     return (
         <View style={styles.container}>
+
             <LinearGradient
                 colors={["#6a11cb", "#2575fc"]}
                 style={styles.background}

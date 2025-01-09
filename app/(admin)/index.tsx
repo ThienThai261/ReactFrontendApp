@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { router } from "expo-router";
+import {handleLogout} from "@/app/(tabs)/(user)/(tabs)/handleLogout";
 
 
 export default function AdminDashboard() {
@@ -18,6 +19,9 @@ export default function AdminDashboard() {
     const handleCartPress = () => {
         router.push("./(cart)/CartScreen")
     }
+    const handleLogoutPress = async () => {
+        await handleLogout();
+    };
     return (
         <View style={styles.container}>
             <View style={styles.linkContainer}>
@@ -45,9 +49,9 @@ export default function AdminDashboard() {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.loginButton}
-                    onPress={handleCartPress}
+                    onPress={handleLogoutPress}
                 >
-                    <Text style={styles.loginButtonText}>Go to cart</Text>
+                    <Text style={styles.loginButtonText}>Log out</Text>
                 </TouchableOpacity>
             </View>
         </View>

@@ -16,6 +16,12 @@ export default function CartLayout() {
                     title: 'Checkout'
                 }}
             />
+            <Stack.Screen
+                name="VoucherScreen"
+                options={{
+                    title: 'Voucher'
+                }}
+            />
         </Stack>
     );
 }

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
+import {router} from "expo-router";
 
 const API_BASE_URL = "http://192.168.0.107:9093/demo";
 
@@ -20,6 +21,9 @@ export default function SignUp({ navigation }) {
     const [fullname, setFullname] = useState("");
     const [phone, setPhone] = useState("");
     const [error, setError] = useState("");
+    const handlePressSignIn = () => {
+        router.push('./Login');
+    };
 
     const handleSignUp = async () => {
         // Basic validation
@@ -36,22 +40,23 @@ export default function SignUp({ navigation }) {
             formData.append("email", email);
             formData.append("fullname", fullname);
             formData.append("phone", phone);
-            formData.append("status", "1"); // Default active status
+            formData.append("status", "1"); // Keep it as a string, Spring will parse it
 
             const response = await axios.post(`${API_BASE_URL}/add`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            console.log('Server response:', response.data);
 
-            if (response.data === "Saved") {
+            if (response.data.includes("successfully")) {
                 Alert.alert(
                     "Registration Successful",
                     "Your account has been created successfully!",
                     [
                         {
                             text: "OK",
-                            onPress: () => navigation.navigate("SignUp"),
+                            onPress: () => router.push('./Login'), // Changed to use router
                         },
                     ]
                 );
@@ -70,7 +75,6 @@ export default function SignUp({ navigation }) {
             }
         }
     };
-
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.container}>
@@ -138,7 +142,7 @@ export default function SignUp({ navigation }) {
                         </LinearGradient>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+                    <TouchableOpacity onPress={handlePressSignIn}>
                         <Text style={styles.signInText}>
                             Already have an account? Sign In
                         </Text>

@@ -112,7 +112,9 @@ const Home = () => {
             setError("Failed to fetch banners");
         }
     };
-
+    const handleVoucher = () => {
+        router.push("../voucher/VoucherList");
+    }
 
 
     // Handle navigation to profile
@@ -147,6 +149,12 @@ const Home = () => {
     return (
         <ScrollView style={styles.mainContainer}>
             <View style={styles.container}>
+                <TouchableOpacity
+
+                    onPress={handleVoucher}
+                >
+                    <Text >Go to user</Text>
+                </TouchableOpacity>
                 {/* Header Section */}
                 <Header title="Match Your Style" />
 
@@ -188,8 +196,11 @@ const Home = () => {
                         data={bannerImages}
                         horizontal
                         showsHorizontalScrollIndicator={false}
+                        pagingEnabled={false} // Optional: If true, it ensures snapping behavior for each screen width.
+                        snapToAlignment="center" // Align snapping to the center of the screen.
+                        snapToInterval={300 + 10} // Add margin (if any) to the image width.
+                        decelerationRate="fast" // Speeds up the snapping effect.
                         renderItem={({ item }) => {
-                            console.log("Rendering banner item:", item); // Debug each item
                             return (
                                 <Image
                                     key={item.id}
@@ -202,8 +213,6 @@ const Home = () => {
                         keyExtractor={(item) => item.id.toString()}
                     />
                 </View>
-
-
 
                 {/* Products Grid */}
                 {loading ? (
@@ -242,14 +251,14 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 15,
         flexDirection: "row",
-        height: 100,
+        height: 150,
         backgroundColor: "#f0f0f0",
         borderRadius: 10,
         overflow: 'hidden',
     },
     bannerImage: {
-        width: 300, // Adjust based on your design
-        height: 150,
+        width: 300, // Must match snapToInterval
+        height: 120,
         borderRadius: 10,
         marginHorizontal: 5,
     },

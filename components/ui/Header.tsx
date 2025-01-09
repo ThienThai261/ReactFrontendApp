@@ -19,10 +19,10 @@ export default function Header({ title }: HeaderProps) {
             const userDetails = await AsyncStorage.getItem("userDetails");
             if (userDetails) {
                 // User is logged in, navigate to user detail screen
-                router.push("./(tabs)/(user)/userDetail");
+                router.push("/(tabs)/(user)/userDetail");
             } else {
                 // User is not logged in, navigate to login screen
-                router.push("./(LoginAndRegister)/Login");
+                router.push("/(LoginAndRegister)/Login");
             }
         } catch (error) {
             console.error("Error checking login status:", error);

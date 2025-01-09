@@ -54,6 +54,12 @@ export default function UserDashboard() {
     const handleOrderHistoryPress = () => {
         router.push("./(tabs)/OrderHistory");
     };
+    const handleSettingPress = () => {
+        router.push("./(tabs)/AccountSetting");
+    };
+    const handleIntro = () => {
+        router.push("./(tabs)/OnboardingScreen");
+    };
 
     const handleChangePasswordPress = () => {
         setModalVisible(true);
@@ -95,6 +101,20 @@ export default function UserDashboard() {
                 >
                     <MaterialIcons name="receipt" size={20} color="#fff"/>
                     <Text style={styles.buttonText}>Order History</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleIntro}
+                >
+                    <MaterialIcons name="receipt" size={20} color="#fff"/>
+                    <Text style={styles.buttonText}>Intro</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleSettingPress}
+                >
+                    <MaterialIcons name="receipt" size={20} color="#fff"/>
+                    <Text style={styles.buttonText}>Account setting</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity

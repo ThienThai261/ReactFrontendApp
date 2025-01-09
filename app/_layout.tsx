@@ -3,10 +3,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { CartProvider } from './(tabs)/(cart)/CartContent';
+import {VoucherProvider} from "@/contexts/VoucherContext";
 
 export default function RootLayout() {
     return (
         <GestureHandlerRootView style={styles.container}>
+            <VoucherProvider>
+                {/* Your existing layout components */}
+
             <CartProvider>
                 <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
@@ -29,6 +33,7 @@ export default function RootLayout() {
                     />
                 </Stack>
             </CartProvider>
+            </VoucherProvider>
         </GestureHandlerRootView>
     );
 }

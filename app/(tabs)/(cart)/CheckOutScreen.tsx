@@ -11,12 +11,14 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCart } from './CartContent';
 import { router } from 'expo-router';
+import VoucherDisplay from "@/components/VoucherDisplay";
 
 const API = "http://192.168.0.107:9093";
 
 const CheckoutScreen = () => {
     const { cartItems, getCartTotal } = useCart();
     const [userId, setUserId] = useState<number | null>(null);
+
     const [formData, setFormData] = useState({
         email: '',
         fullName: '',
@@ -67,7 +69,7 @@ const CheckoutScreen = () => {
         }
         return true;
     };
-
+    const cartTotal = getCartTotal();
     const createOrder = async () => {
         if (!userId) {
             Alert.alert('Error', 'Please login to continue');
@@ -133,7 +135,8 @@ const CheckoutScreen = () => {
 
             <TouchableOpacity style={styles.cartDetailsButton}>
                 <Text style={styles.cartDetailsText}>Show cart details</Text>
-                <Text style={styles.cartAmount}>${getCartTotal()}</Text>
+                {/*<Text style={styles.cartAmount}>${getCartTotal()}</Text>*/}
+                <VoucherDisplay cartTotal={cartTotal} />
             </TouchableOpacity>
 
             <View style={styles.formGroup}>
@@ -198,6 +201,12 @@ const CheckoutScreen = () => {
                     onChangeText={(text) => setFormData({...formData, phoneNumber: text})}
                 />
             </View>
+            <TouchableOpacity
+                style={styles.voucherButton}
+                onPress={() => router.push('./VoucherScreen')}
+            >
+                <Text style={styles.voucherButtonText}>Apply Voucher</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
                 style={[styles.checkoutButton, loading && styles.disabledButton]}
@@ -218,6 +227,19 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#fff',
     },
+    voucherButton: {
+        backgroundColor: '#f39c12',
+        paddingVertical: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    voucherButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
     header: {
         fontSize: 22,
         fontWeight: 'bold',
