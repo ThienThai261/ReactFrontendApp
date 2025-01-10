@@ -1,17 +1,10 @@
-// ReturnButton.tsx
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 const ReturnButton = () => {
-    const navigation = useNavigation();
-
-    const handlePress = () => {
-        navigation.goBack();  // Go back to the previous screen
-    };
-
     return (
-        <TouchableOpacity style={styles.button} onPress={handlePress}>
+        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
             <Text style={styles.buttonText}>Return</Text>
         </TouchableOpacity>
     );
@@ -19,17 +12,17 @@ const ReturnButton = () => {
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: '#4CAF50',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: '#1a73e8',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 4,
+        alignSelf: 'flex-start',
+        marginBottom: 16,
     },
     buttonText: {
-        color: '#fff',
+        color: 'white',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: '500',
     },
 });
 

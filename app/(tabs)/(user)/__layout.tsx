@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import OrderHistory from "@/app/(tabs)/(user)/(tabs)/OrderHistory";
 import PurchasedProducts from "@/app/(tabs)/(user)/(tabs)/PurchasedProducts";
 import AccountSettings from "@/app/(tabs)/(user)/(tabs)/AccountSetting";
-import OnboardingScreen from "@/app/(tabs)/(user)/(tabs)/OnboardingScreen";
+import AboutUs from "@/app/(tabs)/(user)/(tabs)/AboutUs";
 
 
 const Stack = createStackNavigator();
@@ -17,7 +17,7 @@ const App = () => {
                 <Stack.Screen name="SomeScreen" component={OrderHistory} />
                 <Stack.Screen name="AnotherScreen" component={PurchasedProducts} />
                 <Stack.Screen name="AccountSettings" component={AccountSettings} options={{ title: 'Account Settings' }} />
-                <Stack.Screen name="OnboardingScreen" component={OnboardingScreen} />
+                <Stack.Screen name="AboutUs" component={AboutUs} options={{ title: 'About Us' }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

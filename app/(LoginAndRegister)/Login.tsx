@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import {
     StyleSheet,
     Text,
@@ -8,15 +8,15 @@ import {
     Image,
     Alert,
 } from "react-native";
-import {router} from "expo-router";
-import {LinearGradient} from "expo-linear-gradient";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Header from "@/components/ui/Header";
 
 const API_BASE_URL = "http://192.168.0.107:9093/accounts";
 
-export default function LoginAndRegister({navigation}) {
+export default function LoginAndRegister({ navigation }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -33,10 +33,7 @@ export default function LoginAndRegister({navigation}) {
                 },
             });
 
-            console.log("Server response:", response.data);
-
             if (response.data.success) {
-                // Store user details in AsyncStorage
                 const userDetails = {
                     isLoggedIn: true,
                     username: response.data.username,
@@ -44,7 +41,7 @@ export default function LoginAndRegister({navigation}) {
                     fullname: response.data.fullname,
                     phone: response.data.phone,
                     id: response.data.id,
-                    role: response.data.role // Store the role as well
+                    role: response.data.role,
                 };
 
                 await AsyncStorage.setItem("userDetails", JSON.stringify(userDetails));
@@ -52,11 +49,10 @@ export default function LoginAndRegister({navigation}) {
                 Alert.alert("Login Success", "Welcome!");
                 setError("");
 
-                // Check role and redirect accordingly
                 if (response.data.role === 1) {
                     router.push("../(tabs)/(user)/userDetail");
                 } else if (response.data.role === 0) {
-                    router.push("../(admin)/"); // Update this path to match your admin route
+                    router.push("../(admin)/");
                 }
             } else {
                 setError(response.data.message || "Login failed");
@@ -67,9 +63,15 @@ export default function LoginAndRegister({navigation}) {
             handleLoginError(err);
         }
     };
+
     const handlePressSignIn = () => {
-        router.push('./SignUp');
+        router.push("./SignUp");
     };
+
+    const handleForget = () => {
+        router.push("./ForgetPassword");
+    };
+
     const handleLoginError = (err) => {
         if (axios.isAxiosError(err)) {
             if (err.response) {
@@ -91,11 +93,10 @@ export default function LoginAndRegister({navigation}) {
 
     return (
         <View style={styles.container}>
+            {/* Header Component */}
+            <Header title="Login" />
 
-            <LinearGradient
-                colors={["#6a11cb", "#2575fc"]}
-                style={styles.background}
-            />
+            <LinearGradient colors={["#6a11cb", "#2575fc"]} style={styles.background} />
             <View style={styles.loginContainer}>
                 <Text style={styles.title}>Login</Text>
 
@@ -119,7 +120,9 @@ export default function LoginAndRegister({navigation}) {
                 />
 
                 <TouchableOpacity>
-                    <Text style={styles.forgotPassword}>Forgot password?</Text>
+                    <Text style={styles.forgotPassword} onPress={handleForget}>
+                        Forgot password?
+                    </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
@@ -161,7 +164,7 @@ export default function LoginAndRegister({navigation}) {
                 </View>
 
                 <TouchableOpacity onPress={handlePressSignIn}>
-                    <Text style={styles.signUpText}>Or Sign Up Using</Text>
+                    <Text style={styles.signUpText}>Sign Up</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -186,7 +189,7 @@ const styles = StyleSheet.create({
         padding: 20,
         alignItems: "center",
         shadowColor: "#000",
-        shadowOffset: {width: 0, height: 5},
+        shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.1,
         shadowRadius: 10,
         elevation: 5,

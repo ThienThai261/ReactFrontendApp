@@ -11,6 +11,7 @@ import {
     ViewToken,
 } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,24 +26,25 @@ const slides: Slide[] = [
     {
         id: '1',
         image: require('../../../../assets/images/cart-icon.png'),
-        title: 'Choose A Tasty Dish',
-        description: 'Discover delicious meals from our wide selection of dishes, prepared with care and quality ingredients.',
+        title: 'Mua Sắm Dễ Dàng',
+        description: 'Khám phá những bộ trang phục đẹp mắt, chất lượng cao với mức giá cực kỳ hợp lý.',
     },
     {
         id: '2',
         image: require('../../../../assets/images/placeholder.jpg'),
-        title: 'Discover Best Places',
-        description: 'Find the best restaurants near you with ratings and reviews from our community.',
+        title: 'Phong Cách Đa Dạng',
+        description: 'Cập nhật các xu hướng thời trang mới nhất để bạn luôn nổi bật trong mọi dịp.',
     },
     {
         id: '3',
         image: require('../../../../assets/images/splash-icon.png'),
-        title: 'Fast Delivery',
-        description: 'Get your favorite food delivered to your doorstep quickly and safely.',
+        title: 'Giao Hàng Nhanh Chóng',
+        description: 'Đặt hàng và nhận sản phẩm tận nhà một cách tiện lợi và an toàn.',
     },
 ];
 
-export default function OnboardingScreen() {
+
+export default function AboutUs() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const scrollX = useRef(new Animated.Value(0)).current;
     const slidesRef = useRef<FlatList<Slide>>(null);
@@ -52,16 +54,18 @@ export default function OnboardingScreen() {
             setCurrentIndex(viewableItems[0].index ?? 0);
         }
     }).current;
+    const [shouldShowIntro, setShouldShowIntro] = useState(true);
 
+    useEffect(() => {
+        // checkIfShouldShowIntro();
+    }, []);
     const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
-    const scrollTo = () => {
-        console.log('ScrollTo triggered', { currentIndex });
+    const scrollTo = async () => {
         if (currentIndex < slides.length - 1 && slidesRef.current) {
             slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
         } else if (currentIndex === slides.length - 1) {
-            console.log('Navigating to login');
-            router.push('./(auth)/login');
+            router.push('../userDetail');
         }
     };
 
@@ -110,7 +114,7 @@ export default function OnboardingScreen() {
 
     // Debugging for currentIndex
     useEffect(() => {
-        console.log('Current Index Updated:', currentIndex);
+        console.log('Current AboutUs Updated:', currentIndex);
     }, [currentIndex]);
 
     return (

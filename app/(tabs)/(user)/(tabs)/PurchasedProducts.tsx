@@ -1,14 +1,15 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     FlatList,
     StyleSheet,
     ActivityIndicator,
+    TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ReturnButton from "@/components/ui/ReturnButton";
+import { router } from 'expo-router';
 
 interface PurchasedProduct {
     orderId: string;
@@ -66,17 +67,21 @@ const PurchasedProducts = () => {
         }
     };
 
-    if (loading) return <ActivityIndicator size="large" color="#0000ff"/>;
+    if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
     if (error) return <Text style={styles.errorText}>Error: {error}</Text>;
 
     return (
         <View style={styles.container}>
-            <ReturnButton/>
-            <Text style={styles.title}>Purchased Products</Text>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.returnButton}>
+                    <Text style={styles.returnButtonText}>{'<'}</Text>
+                </TouchableOpacity>
+                <Text style={styles.title}>Purchased Products</Text>
+            </View>
             <FlatList
                 data={purchasedProducts}
                 keyExtractor={(item) => `${item.orderId}-${item.productId}`}
-                renderItem={({item}) => (
+                renderItem={({ item }) => (
                     <View style={styles.productCard}>
                         <Text style={styles.productName}>{item.productName}</Text>
                         <Text>Order ID: {item.orderId}</Text>
@@ -99,10 +104,22 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#f5f5f5',
     },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    returnButton: {
+        marginRight: 8,
+    },
+    returnButtonText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#1a73e8',
+    },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 16,
     },
     errorText: {
         fontSize: 16,
@@ -121,7 +138,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 8,
-    }
+    },
 });
 
 export default PurchasedProducts;

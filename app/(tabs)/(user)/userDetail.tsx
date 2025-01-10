@@ -58,7 +58,7 @@ export default function UserDashboard() {
         router.push("./(tabs)/AccountSetting");
     };
     const handleIntro = () => {
-        router.push("./(tabs)/OnboardingScreen");
+        router.push("./(tabs)/AboutUs");
     };
 
     const handleChangePasswordPress = () => {

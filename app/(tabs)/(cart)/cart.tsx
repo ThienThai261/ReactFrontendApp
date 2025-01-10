@@ -83,7 +83,7 @@ const Cart = () => {
         <View style={styles.container}>
             {/* Header at the top */}
             <View >
-                <Header />
+                <Header title={"Giỏ hàng"} />
             </View>
 
             {/* Content below the header */}

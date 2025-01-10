@@ -45,7 +45,7 @@ type BannerType = {
 
 
 
-const Home = () => {
+const Index = () => {
     const API = "http://192.168.0.107:9093";
 
     const [cate, setCate] = useState<CategoryType[]>([]);
@@ -305,4 +305,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Home;
+export default Index;

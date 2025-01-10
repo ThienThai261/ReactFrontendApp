@@ -11,7 +11,7 @@ export default function Header({ title }: HeaderProps) {
     const router = useRouter();
 
     const handleLogoPress = () => {
-        router.push("/"); // Navigate to the home screen (index.tsx at root)
+        router.push("/"); // Navigate to the home screen (Index.tsx at root)
     };
 
     const handleProfilePress = async () => {

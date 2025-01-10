@@ -4,11 +4,12 @@ import {
     Text,
     FlatList,
     StyleSheet,
-    ActivityIndicator,
+    ActivityIndicator, TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReturnButton from "@/components/ui/ReturnButton";
+import {router} from "expo-router";
 
 interface Order {
     id: string;
@@ -37,7 +38,7 @@ const OrderHistory = () => {
         1: 'Confirmed',
         2: 'Shipping',
         3: 'Shipped',
-        4: 'Delivered'
+        4: 'Delivered',
     };
 
     useEffect(() => {
@@ -52,7 +53,6 @@ const OrderHistory = () => {
                 throw new Error('User is not logged in');
             }
 
-            // Assuming the token contains the account ID or use the token to fetch it
             const userDetails = JSON.parse(token);
             const accountId = userDetails.id;
 
@@ -93,8 +93,12 @@ const OrderHistory = () => {
 
     return (
         <View style={styles.container}>
-            <ReturnButton></ReturnButton>
-            <Text style={styles.title}>Purchase History</Text>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.returnButton}>
+                    <Text style={styles.returnButtonText}>{'<'}</Text>
+                </TouchableOpacity>
+                <Text style={styles.title}>Purchase History</Text>
+            </View>
             <FlatList
                 data={orders}
                 keyExtractor={(item) => item.id}
@@ -133,10 +137,23 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#f5f5f5',
     },
+    returnButton: {
+        marginRight: 8,
+    },
+    returnButtonText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#1a73e8',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 16,
+        marginLeft: 8,
     },
     errorText: {
         fontSize: 16,
