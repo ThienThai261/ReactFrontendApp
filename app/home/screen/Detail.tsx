@@ -1,8 +1,8 @@
-import {View, Text, Image, StyleSheet, TouchableOpacity, Alert} from 'react-native'
-import React, {useState} from 'react'
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import React, { useState } from 'react'
 import { ScrollView } from 'react-native';
-import {useRoute, RouteProp} from '@react-navigation/native';
-import {useCart} from '@/app/(tabs)/(cart)/CartContent';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { useCart } from '@/app/(tabs)/(cart)/CartContent';
 
 // Define the type for your product item
 interface ProductItem {
@@ -29,7 +29,7 @@ type DetailRouteParams = {
 export default function Detail() {
     const route = useRoute<RouteProp<DetailRouteParams, 'Detail'>>();
     const item = route.params.item;
-    const {addToCart} = useCart();
+    const { addToCart } = useCart();
 
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -42,14 +42,13 @@ export default function Detail() {
         return [];
     }
 
-    const colorsArray = [
-        "#91A1B0",
-        "#B11D1D",
-        "#1F44A3",
-        "#9F632A",
-        "#1D752B",
-        "#000000",
-    ] as const;
+    const colorMapping = {
+        Đen: "#000000",
+        "Xanh rêu": "#0A5C36",
+        "Xám ghi": "",
+        Đỏ: "#FF0000",
+        Trắng: "#FFFFFF",
+    };
 
     const handleAddToCart = () => {
         if (!selectedSize) {
@@ -88,6 +87,8 @@ export default function Detail() {
         // router.push('/checkout');
     };
 
+    const items = JSON.parse(item);
+
     return (
         <ScrollView>
             <View style={styles.container}>
@@ -103,19 +104,21 @@ export default function Detail() {
 
                 {/* Info */}
                 <View style={styles.contentContainer}>
-                    <Text style={styles.title}>{item.name}</Text>
-                    <Text style={[styles.title, styles.price]}>{item.price} đ</Text>
+                    <Text style={styles.title}>{items.name}</Text>
+                    <Text style={[styles.title, styles.price]}>${items.price}</Text>
+                    <Text style={styles.title}>Gender: {items.gender}</Text>
                 </View>
 
                 {/* Sizes */}
                 <Text style={[styles.title, styles.sizeText]}>Size</Text>
                 <View style={styles.sizeContainer}>
-                    {processString(item.size).map((size, index) => (
+                    {processString(items.size).map((size, index) => (
                         <TouchableOpacity
                             key={`size-${index}`}
                             style={[
                                 styles.sizeValueContainer,
-                                selectedSize === size && styles.selectedSizeContainer
+                                selectedSize === size && styles.selectedSizeContainer,
+                                size.length > 4 && { width: '5%' }
                             ]}
                             onPress={() => setSelectedSize(size)}
                         >
@@ -130,21 +133,46 @@ export default function Detail() {
                 </View>
 
                 {/* Colors */}
-                <Text style={[styles.title, styles.colorText]}>Colors</Text>
-                <View style={styles.colorContainer}>
-                    {colorsArray.map((color, index) => (
-                        <TouchableOpacity
-                            key={`color-${index}`}
-                            style={[
-                                styles.circleBorder,
-                                selectedColor === color && {borderColor: color, borderWidth: 2}
-                            ]}
-                            onPress={() => setSelectedColor(color)}
-                        >
-                            <View style={[styles.circle, {backgroundColor: color}]}/>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                {items.color ? (
+                    <>
+                        <Text style={[styles.title, styles.colorText]}>Colors</Text>
+                        <View style={styles.colorContainer}>
+                            {processString(items.color).map((color, index) => (
+                                !colorMapping[color] ? (
+                                    // Hiển thị tên màu nếu không có mã màu
+                                    <TouchableOpacity
+                                        key={`color-${index}`}
+                                        style={[
+                                            styles.sizeValueContainer,
+                                            selectedSize === color && styles.selectedSizeContainer,
+                                            color.length > 4 && { width: '10%' }
+                                        ]}
+                                        onPress={() => setSelectedSize(color)}
+                                    >
+                                        <Text style={[
+                                            styles.sizeValue,
+                                            selectedSize === color && styles.selectedText
+                                        ]}>
+                                            {color}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity
+                                        key={`color-${index}`}
+                                        style={[
+                                            styles.circleBorder,
+                                            selectedColor === colorMapping[color] && { borderColor: colorMapping[color], borderWidth: 2 }
+                                        ]}
+                                        onPress={() => setSelectedColor(colorMapping[color])}
+                                    >
+                                        <View style={[styles.circle, { backgroundColor: colorMapping[color] }]} />
+                                    </TouchableOpacity>
+                                )
+                            ))}
+                        </View>
+                    </>
+                ) : null}
+
 
                 <View style={styles.btn}>
                     {/* Buy */}
@@ -196,6 +224,7 @@ const styles = StyleSheet.create({
     },
     sizeText: {
         marginHorizontal: 20,
+        marginBottom: 10,
     },
     sizeContainer: {
         flexDirection: "row",
@@ -222,6 +251,7 @@ const styles = StyleSheet.create({
     colorText: {
         marginHorizontal: 20,
         marginTop: 10,
+        marginBottom: 10,
     },
     selectedText: {
         color: "#E55B5B",

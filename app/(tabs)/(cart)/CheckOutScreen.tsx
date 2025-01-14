@@ -6,18 +6,19 @@ import {
     TouchableOpacity,
     StyleSheet,
     ScrollView,
-    Alert
+    Alert,
+    Modal
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCart } from './CartContent';
 import { router } from 'expo-router';
-import VoucherDisplay from "@/components/VoucherDisplay";
 
 const API = "http://192.168.0.107:9093";
 
 const CheckoutScreen = () => {
-    const { cartItems, getCartTotal } = useCart();
-    const [userId, setUserId] = useState<number | null>(null);
+    const { cartItems, getCartTotal, clearCart } = useCart();
+    const [userId, setUserId] = useState(null);
+    const [showCartDetails, setShowCartDetails] = useState(false);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -53,6 +54,43 @@ const CheckoutScreen = () => {
         }
     };
 
+    const CartDetailsModal = () => (
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showCartDetails}
+            onRequestClose={() => setShowCartDetails(false)}
+        >
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalHeader}>Cart Details</Text>
+                    <ScrollView>
+                        {cartItems.map((item) => (
+                            <View key={item.id} style={styles.cartItem}>
+                                <Text style={styles.itemName}>{item.name}</Text>
+                                <View style={styles.itemDetails}>
+                                    <Text>Quantity: {item.quantity}</Text>
+                                    <Text>Price: ${item.price}</Text>
+                                    <Text>Total: ${item.quantity * item.price}</Text>
+                                </View>
+                            </View>
+                        ))}
+                        <View style={styles.totalContainer}>
+                            <Text style={styles.totalText}>Total Amount:</Text>
+                            <Text style={styles.totalAmount}>${getCartTotal()}</Text>
+                        </View>
+                    </ScrollView>
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => setShowCartDetails(false)}
+                    >
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
+
     const validateForm = () => {
         if (!formData.email || !formData.fullName || !formData.address ||
             !formData.zipCode || !formData.phoneNumber) {
@@ -69,7 +107,7 @@ const CheckoutScreen = () => {
         }
         return true;
     };
-    const cartTotal = getCartTotal();
+
     const createOrder = async () => {
         if (!userId) {
             Alert.alert('Error', 'Please login to continue');
@@ -81,17 +119,19 @@ const CheckoutScreen = () => {
         setLoading(true);
         try {
             const orderDetails = cartItems.map(item => ({
-                idProduct: item.id,
+                idProduct: String(item.id),
                 quantity: item.quantity,
-                price: item.price
+                price: parseInt(item.price)
             }));
 
             const orderData = {
                 address: `${formData.address} ${formData.aptSuite} ${formData.zipCode}`,
                 numberPhone: formData.phoneNumber,
-                idAccount: userId,
+                idAccount: parseInt(userId),
                 orderDetails: orderDetails
             };
+
+            console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
             const response = await fetch(`${API}/order/create`, {
                 method: 'POST',
@@ -101,21 +141,29 @@ const CheckoutScreen = () => {
                 body: JSON.stringify(orderData)
             });
 
+            const responseText = await response.text();
+            console.log('API Response:', responseText);
+
             if (!response.ok) {
-                throw new Error('Failed to create order');
+                throw new Error(`Failed to create order: ${responseText}`);
             }
 
-            const result = await response.json();
+            // Clear the cart after successful order
+            clearCart();
+
             Alert.alert(
                 'Success',
                 'Order placed successfully!',
                 [
-                    { text: 'OK', onPress: () => router.push('./(tabs)') }
+                    { text: 'OK', onPress: () => router.push('./') }
                 ]
             );
         } catch (error) {
-            console.error('Error creating order:', error);
-            Alert.alert('Error', 'Failed to create order. Please try again.');
+            console.error('Detailed error:', error);
+            Alert.alert(
+                'Error',
+                `Failed to create order: ${error.message}. Please try again.`
+            );
         } finally {
             setLoading(false);
         }
@@ -125,19 +173,15 @@ const CheckoutScreen = () => {
         <ScrollView style={styles.container}>
             <Text style={styles.header}>Checkout</Text>
 
-            <View style={styles.stepsContainer}>
-                <Text style={[styles.step, styles.activeStep]}>1</Text>
-                <Text style={styles.stepDivider}></Text>
-                <Text style={styles.step}>2</Text>
-                <Text style={styles.stepDivider}></Text>
-                <Text style={styles.step}>3</Text>
-            </View>
-
-            <TouchableOpacity style={styles.cartDetailsButton}>
+            <TouchableOpacity
+                style={styles.cartDetailsButton}
+                onPress={() => setShowCartDetails(true)}
+            >
                 <Text style={styles.cartDetailsText}>Show cart details</Text>
-                {/*<Text style={styles.cartAmount}>${getCartTotal()}</Text>*/}
-                <VoucherDisplay cartTotal={cartTotal} />
+                <Text style={styles.cartAmount}>${getCartTotal()}</Text>
             </TouchableOpacity>
+
+            <CartDetailsModal />
 
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Email</Text>
@@ -180,15 +224,15 @@ const CheckoutScreen = () => {
                 />
             </View>
 
-            <View style={styles.row}>
+            <View style={styles.formGroup}>
+                <Text style={styles.label}>ZIP Code</Text>
                 <TextInput
-                    style={[styles.input, styles.zipInput]}
-                    placeholder="ZIP"
+                    style={styles.input}
+                    placeholder="Enter ZIP code"
                     keyboardType="numeric"
                     value={formData.zipCode}
                     onChangeText={(text) => setFormData({...formData, zipCode: text})}
                 />
-                <Text style={styles.city}>Chicago, IL</Text>
             </View>
 
             <View style={styles.formGroup}>
@@ -201,12 +245,6 @@ const CheckoutScreen = () => {
                     onChangeText={(text) => setFormData({...formData, phoneNumber: text})}
                 />
             </View>
-            <TouchableOpacity
-                style={styles.voucherButton}
-                onPress={() => router.push('./VoucherScreen')}
-            >
-                <Text style={styles.voucherButtonText}>Apply Voucher</Text>
-            </TouchableOpacity>
 
             <TouchableOpacity
                 style={[styles.checkoutButton, loading && styles.disabledButton]}
@@ -221,57 +259,32 @@ const CheckoutScreen = () => {
     );
 };
 
+
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
         backgroundColor: '#fff',
     },
-    voucherButton: {
-        backgroundColor: '#f39c12',
-        paddingVertical: 10,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    voucherButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-
     header: {
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: 'bold',
-        textAlign: 'center',
         marginBottom: 20,
+        textAlign: 'center',
     },
-    stepsContainer: {
-        flexDirection: 'row',
+    modalContainer: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    step: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        borderWidth: 2,
-        borderColor: '#ccc',
-        textAlign: 'center',
-        lineHeight: 28,
-        fontWeight: 'bold',
-        fontSize: 16,
-        color: '#ccc',
-    },
-    activeStep: {
-        borderColor: '#00bfff',
-        color: '#00bfff',
-    },
-    stepDivider: {
-        width: 40,
-        height: 2,
-        backgroundColor: '#ccc',
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        width: '90%',
+        maxHeight: '80%',
     },
     cartDetailsButton: {
         flexDirection: 'row',
@@ -291,52 +304,85 @@ const styles = StyleSheet.create({
     cartAmount: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#00bfff',
     },
     formGroup: {
         marginBottom: 15,
     },
     label: {
-        fontSize: 14,
+        fontSize: 16,
         marginBottom: 5,
         color: '#333',
     },
     input: {
         height: 45,
-        borderColor: '#ccc',
+        borderColor: '#ddd',
         borderWidth: 1,
         borderRadius: 10,
-        paddingHorizontal: 10,
-        backgroundColor: '#f9f9f9',
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    zipInput: {
-        flex: 1,
-        marginRight: 10,
-    },
-    city: {
-        flex: 2,
+        paddingHorizontal: 15,
+        backgroundColor: '#fff',
         fontSize: 16,
-        color: '#333',
+    },
+    checkoutButton: {
+        backgroundColor: '#00bfff',
+        padding: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 20,
+        marginBottom: 30,
+    },
+    checkoutButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     disabledButton: {
         opacity: 0.7,
     },
-    checkoutButton: {
-        marginTop: 20,
-        backgroundColor: '#00bfff',
-        paddingVertical: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginBottom: 30,
+    modalHeader: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        textAlign: 'center',
     },
-
-    checkoutButtonText: {
-        color: '#fff',
+    cartItem: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        paddingVertical: 10,
+    },
+    itemName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    itemDetails: {
+        marginTop: 5,
+    },
+    totalContainer: {
+        marginTop: 15,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#eee',
+    },
+    totalText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    totalAmount: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#00bfff',
+    },
+    closeButton: {
+        backgroundColor: '#00bfff',
+        padding: 10,
+        borderRadius: 10,
+        marginTop: 15,
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
     },

@@ -14,6 +14,7 @@ type CartContextType = {
     addToCart: (product: any) => void;
     removeFromCart: (productId: string | number) => void;
     updateQuantity: (productId: string | number, increment: boolean) => void;
+    clearCart: () => void;
     getCartTotal: () => number;
 };
 
@@ -23,6 +24,9 @@ export const CartProvider = ({children}: { children: React.ReactNode }) => {
     const [cartItems, setCartItems] = useState<CartItem[]>([
 
     ]);
+    const clearCart = () => {
+        setCartItems([]); // Clear all items in the cart
+    };
 
     const addToCart = (product: any) => {
         setCartItems(prevItems => {

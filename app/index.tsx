@@ -153,7 +153,7 @@ const Index = () => {
 
                     onPress={handleVoucher}
                 >
-                    <Text >Go to user</Text>
+
                 </TouchableOpacity>
                 {/* Header Section */}
                 <Header title="Match Your Style" />
