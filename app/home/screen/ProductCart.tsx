@@ -4,9 +4,10 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-na
 import { router } from "expo-router";
 import Feather from "react-native-vector-icons/Feather";
 import { useCart } from '@/app/(tabs)/(cart)/CartContent';
+import { baseurl } from '@/app/baseurl';
 
 
-const API = "http://192.168.0.107:9093";
+const API = baseurl;
 
 interface ProductCartProps {
     item: {

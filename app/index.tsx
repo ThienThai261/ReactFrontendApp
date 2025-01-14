@@ -17,6 +17,7 @@ import Fontisto from "react-native-vector-icons/Fontisto";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "@/components/ui/Header";
+import { baseurl } from "./baseurl";
 
 // Define types for Category, Product, and Banner
 type CategoryType = {
@@ -46,21 +47,22 @@ type BannerType = {
 
 
 const Index = () => {
-    const API = "http://192.168.0.107:9093";
+    const API = baseurl;
 
     const [cate, setCate] = useState<CategoryType[]>([]);
     const [product, setProduct] = useState<ProductType[]>([]);
- // State for banners
+    // State for banners
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchText, setSearchText] = useState<string>("");
     const [bannerImages, setBannerImages] = useState<BannerType[]>([]);
+    const [filteredProducts, setFilteredProducts] = useState<ProductType[]>([]);
 
-    // Fetch categories
+    // categories
     const loadCate = async () => {
         try {
-            const result = await axios.get<CategoryType[]>(`${API}/cate/all`);
+            const result = await axios.get<CategoryType[]>(`${API}/categories`);
             setCate(result.data);
         } catch (error) {
             console.error("Error fetching categories:", error);
@@ -73,19 +75,21 @@ const Index = () => {
         try {
             const response = await axios.get<any[]>(`${API}/product/all`);
             const transformedProducts = response.data.map((item: any) => ({
-                id: item.product.id,
-                name: item.product.name,
-                price: item.product.price,
-                quantity: item.product.quantity,
-                material: item.product.material,
-                size: item.product.size,
-                gender: item.product.gender,
-                status: item.product.status,
-                id_category: item.product.idCategory,
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                material: item.material,
+                size: item.size,
+                color: item.color,
+                gender: item.gender,
+                status: item.status,
+                id_category: item.idCategory,
                 thumbnailUrl: item.thumbnailUrl,
                 imageUrls: item.imageUrls || []
             }));
             setProduct(transformedProducts);
+            setFilteredProducts(transformedProducts);
             setError(null);
         } catch (err) {
             console.error("Error fetching products:", err);
@@ -138,13 +142,17 @@ const Index = () => {
         fetchBanners();  // Call the fetchBanners function
     }, []);
 
-    // Filter products based on selected category and search text
-    const filteredProducts = product.filter(item => {
-        const matchesCategory = !selectedCategory || item.id_category === selectedCategory;
-        const matchesSearch = !searchText ||
-            item.name.toLowerCase().includes(searchText.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    // cate and search
+    useEffect(() => {
+        const newFilteredProduct = product.filter(product => {
+            // Logic lọc kết hợp
+            const nameMatch = product.name.toLowerCase().includes(searchText.toLowerCase());
+            const categoryMatch = selectedCategory === null || product.id_category === selectedCategory;
+
+            return nameMatch && categoryMatch; // Chỉ giữ lại sản phẩm khi cả hai điều kiện đều đúng
+        });
+        setFilteredProducts(newFilteredProduct);
+    }, [searchText, selectedCategory]);
 
     return (
         <ScrollView style={styles.mainContainer}>
@@ -170,26 +178,28 @@ const Index = () => {
                         style={styles.textInput}
                         placeholder="Search"
                         placeholderTextColor="#C0C0C0"
+                        onChangeText={text => setSearchText(text)}
                         value={searchText}
-                        onChangeText={setSearchText}
                     />
                 </View>
 
                 {/* Categories */}
-                <FlatList
-                    data={cate}
-                    renderItem={({item}) => (
-                        <Category
-                            item={item.name}
-                            selectedCategory={selectedCategory}
-                            setSelectedCategory={setSelectedCategory}
-                        />
-                    )}
-                    keyExtractor={(item) => item.id.toString()}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.categoryList}
-                />
+                <View style={styles.categoryList}>
+                    <FlatList
+                        data={cate}
+                        renderItem={({ item }) => (
+                            <Category
+                                item={item.id}
+                                selectedCategory={selectedCategory}
+                                setSelectedCategory={setSelectedCategory}
+                                productName={item.name}
+                            />
+                        )}
+                        keyExtractor={(item) => item.id.toString()}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                    />
+                </View>
 
                 <View style={styles.banner}>
                     <FlatList
@@ -222,8 +232,8 @@ const Index = () => {
                 ) : (
                     <View style={styles.productsContainer}>
                         <FlatList
-                            data={filteredProducts.slice(0, 20)}
-                            renderItem={({item}) => <ProductCart item={item} />}
+                            data={filteredProducts}
+                            renderItem={({ item }) => <ProductCart item={item} />}
                             keyExtractor={(item) => item.id.toString()}
                             numColumns={2}
                             showsVerticalScrollIndicator={false}
@@ -245,7 +255,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     categoryList: {
-        marginBottom: 15,
+        height: 50,
     },
     banner: {
         marginTop: 10,
