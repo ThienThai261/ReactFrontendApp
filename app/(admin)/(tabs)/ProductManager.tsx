@@ -626,7 +626,7 @@ const ProductDetailModal = ({
                                 ))
                             ) : (
                                 <View style={[styles.galleryImage, styles.placeholderImage]}>
-                                    <ImageIcon size={40} color="#999"/>
+
                                 </View>
                             )}
                         </ScrollView>

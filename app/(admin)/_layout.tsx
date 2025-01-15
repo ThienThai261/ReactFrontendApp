@@ -32,6 +32,13 @@ export default function AdminLayout() {
                     title: 'Order Manager',
                 }}
             />
+            <Drawer.Screen
+                name="(tabs)/VoucherManager"
+                options={{
+                    drawerLabel: 'Voucher',
+                    title: 'Voucher Manager',
+                }}
+            />
         </Drawer>
     );
 }

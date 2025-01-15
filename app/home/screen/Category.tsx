@@ -1,39 +1,23 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { TouchableOpacity } from 'react-native'
 
-const Category = ({ item, selectedCategory, setSelectedCategory }) => {
-  const handleCategoryPress = (category) => {
-    setSelectedCategory(category);
-  };
-
-  // useEffect(() => {
-  //   console.log('selectedCategory:', selectedCategory);
-  // }, [selectedCategory]);
-
-  //const filteredProducts = item.filter(item => item.category === selectedCategory);
+const Category = ({ item, selectedCategory, setSelectedCategory, productName }) => {
 
   return (
-    <View>
-      <TouchableOpacity onPress={() => setSelectedCategory(item)}>
-        <Text
-          style={[styles.categoryText,
-          selectedCategory === item && {
-            color: "#FFF",
-            backgroundColor: "#E96E6E",
-          }
-          ]}>{item}</Text>
-      </TouchableOpacity>
-      {/* 
-      <FlatList
-        data={filteredProducts}
-        renderItem={({ item }) => (
-          <View>
-            <Text>Tên sản phẩm: {item.name}</Text>
-          </View>
-        )}>
-      </FlatList> */}
-    </View>
+      <View>
+        <TouchableOpacity onPress={() => setSelectedCategory(selectedCategory === item ? null : item)
+        }>
+          <Text
+              style={[styles.categoryText,
+                selectedCategory === item && {
+                  color: "#FFF",
+                  backgroundColor: "#E96E6E",
+                }
+              ]}>{productName}
+          </Text>
+        </TouchableOpacity>
+      </View>
   );
 }
 

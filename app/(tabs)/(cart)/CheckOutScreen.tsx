@@ -170,7 +170,11 @@ const CheckoutScreen = () => {
     };
 
     return (
+
         <ScrollView style={styles.container}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.returnButton}>
+                <Text style={styles.returnButtonText}>{'<'}</Text>
+            </TouchableOpacity>
             <Text style={styles.header}>Checkout</Text>
 
             <TouchableOpacity
@@ -245,6 +249,12 @@ const CheckoutScreen = () => {
                     onChangeText={(text) => setFormData({...formData, phoneNumber: text})}
                 />
             </View>
+            <TouchableOpacity
+                style={styles.voucherButton}
+                onPress={() => router.push('./VoucherScreen')}
+            >
+                <Text style={styles.voucherButtonText}>Apply Voucher</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
                 style={[styles.checkoutButton, loading && styles.disabledButton]}
@@ -266,6 +276,30 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: '#fff',
+    },
+    returnButton: {
+        marginRight: 8,
+    },
+    returnButtonText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#1a73e8',
+    },
+    voucherButton: {
+        backgroundColor: '#f0f0f0',
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 20,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    voucherButtonText: {
+        color: '#00bfff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     header: {
         fontSize: 24,

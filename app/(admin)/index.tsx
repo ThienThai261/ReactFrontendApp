@@ -31,24 +31,6 @@ export default function AdminDashboard() {
                 </Text>
                 <TouchableOpacity
                     style={styles.loginButton}
-                    onPress={handleUserPress}
-                >
-                    <Text style={styles.loginButtonText}>Go to user</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.loginButton}
-                    onPress={handleLoginPress}
-                >
-                    <Text style={styles.loginButtonText}>Go to Login</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.loginButton}
-                    onPress={handledetailPress}
-                >
-                    <Text style={styles.loginButtonText}>Go to detail</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.loginButton}
                     onPress={handleLogoutPress}
                 >
                     <Text style={styles.loginButtonText}>Log out</Text>
